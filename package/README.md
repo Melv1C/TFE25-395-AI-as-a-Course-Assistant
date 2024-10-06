@@ -34,6 +34,7 @@ assistant = AICourseAssistant("What is the capital of France?", "Paris")
 ```python
 assistant.add_grade(10)
 assistant.add_solution("Paris")
+assistant.add_output("the ouput of the code when executed")
 ```
 
 

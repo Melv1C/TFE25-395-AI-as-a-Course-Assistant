@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: ai_course_assistant
-Version: 0.0.4
+Version: 1.0.0
 Summary: A course assistant that provides feedback on student answers using a chatbot.
 Author: Claes Melvyn
 Author-email: melvyn.claes@student.uclouvain.be
@@ -12,99 +12,48 @@ Provides-Extra: dev
 Requires-Dist: pytest; extra == "dev"
 Requires-Dist: twine; extra == "dev"
 
-<!-- 
-import requests
-
-class AICourseAssistant:
-    server_url = None
-    access_token = None
-
-    @classmethod
-    def init(cls, url, token):
-        cls.server_url = url
-        cls.access_token = token
-
-    @classmethod
-    def check_initialized(cls):
-        if not cls.server_url or not cls.access_token:
-            raise ValueError("Server URL and access token must be set before using the assistant.")
-
-    def __init__(self, question, student_input):
-        AICourseAssistant.check_initialized()
-        self.question = question
-        self.student_input = student_input
-        self.grade = None
-        self.solution = None
-        self.previous_input = None
-
-    def add_grade(self, grade):
-        self.grade = grade
-
-    def add_solution(self, solution):
-        self.solution = solution
-
-    def add_previous_input(self, previous_input):
-        self.previous_input = previous_input
-
-    def ask_feedback(self):
-        AICourseAssistant.check_initialized()
-        
-        data = {
-            'question': self.question,
-            'student_input': self.student_input,
-            'grade': self.grade,
-            'solution': self.solution,
-            'previous_input': self.previous_input
-        }
-        headers = {
-            'Authorization': f'Bearer {AICourseAssistant.access_token}'
-        }
-        response = requests.post(AICourseAssistant.server_url, json=data, headers=headers)
-        return response.json()
-
-# Example usage:
-# AICourseAssistant.init("https://example.com/api", "your_access_token")
-# assistant = AICourseAssistant("What is the capital of France?", "Paris")
-# assistant.add_grade(10)
-# assistant.add_solution("The capital of France is Paris.")
-# assistant.add_previous_input("London")
-# feedback = assistant.ask_feedback()
-# print(feedback) -->
 
 # AI Course Assistant
 
-This is a simple AI course assistant that can be used to get feedback on student answers. The assistant can be used to send a question, student input, grade, solution, and previous input to a server and get feedback on the student's answer.
+The AI Course Assistant Python package is designed to facilitate communication between INGInious and a serve. This assistant simplifies the process by automating the exchange of information such as questions, student responses, grades, â€¦
+
+## Installation
+
+To install the AI Course Assistant package, you can use the following command:
+
+```bash
+pip install -i https://test.pypi.org/simple/ ai-course-assistant
+```
 
 ## Usage
 
-1. Initialize the assistant with the server URL and access token using the `init` class method.
-2. Create an instance of the assistant with the question and student input.
-3. Add the grade, solution, and previous input using the `add_grade`, `add_solution`, and `add_previous_input` methods.
-4. Use the `ask_feedback` method to send the data to the server and get feedback on the student's answer.
+The package offers a straightforward API that allows instructors to send and receive information about student answers. Here is an example of how to use the package:
 
-Example usage:
+1. Import the `AICourseAssistant` class from the package and initialize it with the server URL and access token.
 
 ```python
-AICourseAssistant.init("https://example.com/api", "your_access_token")
-assistant = AICourseAssistant("What is the capital of France?", "Paris")
-assistant.add_grade(10)
-assistant.add_solution("The capital of France is Paris.")
-assistant.add_previous_input("London")
-feedback = assistant.ask_feedback()
-print(feedback)
+from ai_course_assistant import AICourseAssistant
+
+AICourseAssistant.init("https://example.com/get_feedback", "your_access_token")
 ```
 
-The server should expect a POST request with a JSON payload containing the following fields:
-- `question`: The question asked to the student.
-- `student_input`: The student's answer to the question.
-- `grade`: The grade given to the student's answer.
-- `solution`: The correct solution to the question.
-- `previous_input`: The student's previous answer (if any).
+2. Create an instance of the `AICourseAssistant` class with the question and the expected answer.
 
-The server should return a JSON response with feedback on the student's answer.
+```python
+assistant = AICourseAssistant("What is the capital of France?", "Paris")
+```
 
-This assistant can be used to automate the process of grading student answers and providing feedback in an educational setting.
+3. Add optional attributes such as the maximum grade or the solution.
+
+```python
+assistant.add_grade(10)
+assistant.add_solution("Paris")
+assistant.add_output("the ouput of the code when executed")
+```
 
 
+4. Use the `ask_feedback` method to get feedback on the student's answer. This method will send all the necessary information to the server and return the feedback.
 
-
+```python
+print(assistant.ask_feedback())
+```

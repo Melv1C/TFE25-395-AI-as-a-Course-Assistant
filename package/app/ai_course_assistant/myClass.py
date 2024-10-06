@@ -20,7 +20,7 @@ class AICourseAssistant:
         self.student_input = student_input
         self.grade = None
         self.solution = None
-        self.previous_input = None
+        self.output = None
 
     def add_grade(self, grade):
         self.grade = grade
@@ -28,8 +28,9 @@ class AICourseAssistant:
     def add_solution(self, solution):
         self.solution = solution
 
-    def add_previous_input(self, previous_input):
-        self.previous_input = previous_input
+    def add_output(self, output):
+        self.output = output
+
 
     def ask_feedback(self):
         AICourseAssistant._check_initialized()
@@ -38,7 +39,7 @@ class AICourseAssistant:
             'student_input': self.student_input,
             'grade': self.grade,
             'solution': self.solution,
-            'previous_input': self.previous_input
+            'output': self.output
         }
         headers = {
             'Authorization': f'Bearer {AICourseAssistant.access_token}'
@@ -47,8 +48,8 @@ class AICourseAssistant:
             response = requests.post(AICourseAssistant.server_url, json=data, headers=headers)
             response.raise_for_status()
         except requests.exceptions.HTTPError as e:
-            return e.response.json(), e.response.status_code
+            return f"HTTP error: {e}",
         except requests.exceptions.RequestException as e:
-            return {"error": str(e)}, 500
+            return f"Request error: {e}",
         
         return response.json()["feedback"]
