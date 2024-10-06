@@ -1,0 +1,9 @@
+README.md
+setup.py
+app/ai_course_assistant/__init__.py
+app/ai_course_assistant/myClass.py
+app/ai_course_assistant.egg-info/PKG-INFO
+app/ai_course_assistant.egg-info/SOURCES.txt
+app/ai_course_assistant.egg-info/dependency_links.txt
+app/ai_course_assistant.egg-info/requires.txt
+app/ai_course_assistant.egg-info/top_level.txt
