@@ -20,7 +20,7 @@ IMAGE_NAME="$DOCKER_ACCOUNT/ai-course-assistant-server"
 docker build -t $IMAGE_NAME:$VERSION -t $IMAGE_NAME:latest .
 
 # Ask for confirmation before pushing the Docker images
-read -p "Do you want to push the Docker images to Docker Hub? (y/n): " CONFIRM
+read -p "Do you want to push the Docker images to Docker Hub? (y/N): " CONFIRM
 if [[ "$CONFIRM" != "y" ]]; then
     echo "Aborting push."
     exit 0
