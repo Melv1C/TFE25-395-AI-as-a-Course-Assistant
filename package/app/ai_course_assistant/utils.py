@@ -14,8 +14,9 @@ def get_admonition(cssclass, title, text):
     if cssclass not in ["info", "danger", "warning", "success"]:
         cssclass = "info"
 
-    rst = ("\n\n.. admonition:: " + title + "\n") if title else "\n\n.. note:: \n"
-    rst += "\t:class: alert alert-" + cssclass + "\n\n"
+    rst = "\n\n.. admonition:: " + cssclass + "\n"
+    rst += "\t:title: " + title + "\n\n"
+
     for line in text.splitlines():
         rst += "\t" + line + "\n"
 
