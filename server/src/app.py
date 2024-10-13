@@ -7,7 +7,7 @@ from AI.OpenAI import get_response
 
 PORT = os.getenv('PORT', 5000)
 ACCESS_TOKEN = os.getenv('ACCESS_TOKEN', None)
-ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', "")
+ALLOWED_ORIGIN = os.getenv('ALLOWED_ORIGINS', "")
 
 class MyResponse:
     def __init__(self, code, message, data=None):
@@ -21,10 +21,9 @@ class MyResponse:
             "message": self.message,
             "data": self.data
         }
-    
 
 app = Flask(__name__)
-CORS(app, origins=["http://inginious.com"])
+CORS(app, origins=[ALLOWED_ORIGIN])
 
 class RequestParser:
     def __init__(self, data):

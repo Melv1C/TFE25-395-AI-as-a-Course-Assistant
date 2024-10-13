@@ -1,15 +1,21 @@
-from ai_course_assistant import AICourseAssistant
+from ai_course_assistant import AICourseAssistant, AIFeedbackBlock
 
-from inginious_container_api import feedback
+from inginious_container_api import feedback, input
 
 URL = "https://example.com/get_feedback"
-ACCESS_TOKEN = "your_access_token"
 
 if __name__ == "__main__":
-    AICourseAssistant.init(URL, ACCESS_TOKEN)
+    question = open("question.txt", "r").read()
+    input_student = input.get_input("code")
 
-    assistant = AICourseAssistant("What is the capital of France?", "Paris")
+    feedback.set_global_result("success")
+    feedback.set_grade(100)
+    feedback.set_global_feedback("Some basic feedback")
 
-    feedback.set_global_feedback(assistant.ask_feedback())
+    AICourseAssistant.init(URL)
+    assistant = AICourseAssistant(question, input_student)
+    res = assistant.ask_feedback()
+    if res.status:
+        feedback.set_global_feedback(AIFeedbackBlock(res.message), True)
 
         

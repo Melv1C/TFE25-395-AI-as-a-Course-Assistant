@@ -36,9 +36,9 @@ class AICourseAssistant:
             if response.status_code == 200 or response.status_code == response.json()['code']:
                 return MyResponse.parse(response.json())
             else:
-                return MyResponse(500, f"{response.status_code} - {response.reason}")
+                return MyResponse(False, f"{response.status_code} - {response.reason}")
         except requests.exceptions.Timeout:
-            return MyResponse(408, "Request timed out.")
+            return MyResponse(False, "Request timed out.")
         except Exception as e:
-            return MyResponse(501, "Unknown error: " + str(e)) 
+            return MyResponse(False, "Unknown error: " + str(e)) 
         
