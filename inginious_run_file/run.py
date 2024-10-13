@@ -15,7 +15,7 @@ if __name__ == "__main__":
     AICourseAssistant.init(URL)
     assistant = AICourseAssistant(question, input_student)
     res = assistant.ask_feedback()
-    if res.status:
+    if res.success:
         feedback.set_global_feedback(AIFeedbackBlock(res.message), True)
 
         

@@ -47,7 +47,7 @@ assistant.add("output", "the ouput of the code when executed")
 response = assistant.ask_feedback(timeout=10) # Timeout is optional (default is 10 seconds)
 
 """
-response.status: bool
+response.success: bool
 response.message: str
 """
 ```

@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: ai_course_assistant
-Version: 1.1.3
+Version: 1.1.4
 Summary: A course assistant that provides feedback on student answers using a chatbot.
 Author: Claes Melvyn
 Author-email: melvyn.claes@student.uclouvain.be
@@ -61,7 +61,7 @@ assistant.add("output", "the ouput of the code when executed")
 response = assistant.ask_feedback(timeout=10) # Timeout is optional (default is 10 seconds)
 
 """
-response.status: bool
+response.success: bool
 response.message: str
 """
 ```
