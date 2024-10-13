@@ -20,7 +20,11 @@ The package offers a straightforward API that allows instructors to send and rec
 ```python
 from ai_course_assistant import AICourseAssistant
 
-AICourseAssistant.init("https://example.com/get_feedback", "your_access_token")
+AICourseAssistant.init("https://example.com/get_feedback")
+
+# If the server requires an access token
+# AICourseAssistant.init("https://example.com/get_feedback", "access_token")
+
 ```
 
 2. Create an instance of the `AICourseAssistant` class with the question and the expected answer.
@@ -32,14 +36,28 @@ assistant = AICourseAssistant("What is the capital of France?", "Paris")
 3. Add optional attributes such as the maximum grade or the solution.
 
 ```python
-assistant.add_grade(10)
-assistant.add_solution("Paris")
-assistant.add_output("the ouput of the code when executed")
+assistant.add("grade", 10)
+assistant.add("solution", "Paris")
+assistant.add("output", "the ouput of the code when executed")
 ```
-
 
 4. Use the `ask_feedback` method to get feedback on the student's answer. This method will send all the necessary information to the server and return the feedback.
 
 ```python
-print(assistant.ask_feedback())
+response = assistant.ask_feedback(timeout=10) # Timeout is optional (default is 10 seconds)
+
+"""
+response.status: bool
+response.message: str
+"""
+```
+
+5. Use utility methods to parse the response into restrucredText format.
+
+```python
+from ai_course_assistant import toRST, AIFeedbackBlock
+
+# toRST(response.message) converts the response into a restructuredText format
+
+# AIFeedbackBlock(response.message) put the response into an admonition block
 ```
