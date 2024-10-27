@@ -1,7 +1,7 @@
 
 # AI Course Assistant
 
-The AI Course Assistant Python package is designed to facilitate communication between INGInious and a serve. This assistant simplifies the process by automating the exchange of information such as questions, student responses, grades, …
+The AI Course Assistant Python package is designed to facilitate communication between INGInious and a serve. This assistant simplifies the process by automating the exchange of information such as questions, student responses, grades, ...
 
 ## Installation
 
@@ -41,16 +41,30 @@ assistant.add("solution", "Paris")
 assistant.add("output", "the ouput of the code when executed")
 ```
 
-4. Use the `ask_feedback` method to get feedback on the student's answer. This method will send all the necessary information to the server and return the feedback.
+4. Use the `getFeedbackSync` method to get feedback on the student's answer. This method will send all the necessary information to the server and return the feedback.
 
 ```python
-response = assistant.ask_feedback(timeout=10) # Timeout is optional (default is 10 seconds)
+response = assistant.getFeedbackSync(timeout=10) # Timeout is optional (default is 5 seconds)
 
 """
 response.success: bool
-response.message: str
+response.feedback: str
+response.message: str (Error message if success is False)
 """
 ```
+
+Or use the `getFeedbackAsync` method to get an id that can be used to retrieve the feedback later.
+
+```python
+response = assistant.getFeedbackAsync(timeout=10) # Timeout is optional (default is 5 seconds)
+
+"""
+response.success: bool
+response.id: str
+response.message: str (Error message if success is False)
+"""
+```
+
 
 5. Use utility methods to parse the response into restrucredText format.
 
@@ -60,4 +74,6 @@ from ai_course_assistant import toRST, AIFeedbackBlock
 # toRST(response.message) converts the response into a restructuredText format
 
 # AIFeedbackBlock(response.message) put the response into an admonition block
+
+# AsyncFeedbackBlock(url, response.id) put get an HTML block that can be used to retrieve the feedback later
 ```
