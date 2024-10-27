@@ -95,10 +95,8 @@ def get_feedback_async():
     
     # Save data to the database
     data_id = save_data(parser.data)
-
-    print(data_id)
     
-    res = MyResponse(200, "Success", {"id": str(data_id)})
+    res = MyResponse(200, "Success", data_id)
     return jsonify(res.json())
 
 @app.route('/getFeedbackAsync/<id>', methods=['GET'])
