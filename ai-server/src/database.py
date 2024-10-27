@@ -46,12 +46,7 @@ def save_data(data: Dict[str, Any]) -> Optional[str]:
 
 # Get data from the database by submission_id
 def get_data_by_id(id: str) -> DataModel:
-    print(id)
-    all_data = collection.find()
-    for item in all_data:
-        print(item)
     data = collection.find_one({"_id": ObjectId(id)})
-    print(data)
     return DataModel.from_mongo(data).model_dump() if data else None
 
 # Add a discussion item to the data

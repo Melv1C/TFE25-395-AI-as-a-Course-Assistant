@@ -106,7 +106,6 @@ def get_feedback_async_by_id(id):
         res = MyResponse(404, "Data not found")
         return jsonify(res.json()), 404
     
-    print(data)
     prompt = generate_prompt(data['question'], data['student_input'])
     add_discussion_item(id, {"role": "teacher", "message": prompt})
 
@@ -141,7 +140,6 @@ def get_feedback_sync():
     if data is None:
         res = MyResponse(404, "Data not found")
         return jsonify(res.json()), 404
-    print(data)
 
     prompt = generate_prompt(data['question'], data['student_input'])
     add_discussion_item(data_id, {"role": "teacher", "message": prompt})
