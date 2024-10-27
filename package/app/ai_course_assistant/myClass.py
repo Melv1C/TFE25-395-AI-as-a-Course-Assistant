@@ -26,13 +26,23 @@ class AICourseAssistant:
     def add(self, key, value):
         self.data[key] = value
 
-    def ask_feedback(self, timeout=5):
+    def getFeedbackSync(self, timeout=5):
+        return self._getFeedback(False, timeout)
+        
+    def getFeedbackAsync(self, timeout=5):
+        return self._getFeedback(True, timeout)
+
+    def _getFeedback(self, isAsync, timeout):
         AICourseAssistant._check_initialized()
         headers = {
             'Authorization': f'Bearer {AICourseAssistant.access_token}'
         }
         try:
-            response = requests.post(AICourseAssistant.server_url, json=self.data, headers=headers, timeout=timeout)
+            if isAsync:
+                response = requests.post(f"${AICourseAssistant.server_url}/getFeedbackAsync", json=self.data, headers=headers, timeout=timeout)
+            else:
+                response = requests.post(f"${AICourseAssistant.server_url}/getFeedbackSync", json=self.data, headers=headers, timeout=timeout)
+
             if response.status_code == 200 or response.status_code == response.json()['code']:
                 return MyResponse.parse(response.json())
             else:
@@ -40,5 +50,5 @@ class AICourseAssistant:
         except requests.exceptions.Timeout:
             return MyResponse(False, "Request timed out.")
         except Exception as e:
-            return MyResponse(False, "Unknown error: " + str(e)) 
+            return MyResponse(False, "Unknown error: " + str(e))
         

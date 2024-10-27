@@ -1,7 +1,7 @@
 class MyResponse:
     def __init__(self, success, message) -> None:
-        self.success = success    # boolean
-        self.message = message  # string
+        self.success = success      # boolean
+        self.message = message      # string
 
     @staticmethod
     def parse(response: dict) -> 'MyResponse':
