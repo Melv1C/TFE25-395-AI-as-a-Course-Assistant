@@ -1,0 +1,1 @@
+docker build -t ai_course_assistant_container .
