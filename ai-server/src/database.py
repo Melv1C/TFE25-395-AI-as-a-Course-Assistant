@@ -1,11 +1,10 @@
 import os
 from pymongo import MongoClient
+from bson import ObjectId
 
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 from datetime import datetime
-
-import uuid
 
 MONGO_URI = os.getenv('MONGO_URI', 'mongodb://localhost:27017')
 MONGO_DB = os.getenv('MONGO_DB', 'ai_course_assistant')
@@ -29,28 +28,38 @@ class DataModel(BaseModel):
     metadata: Optional[Dict[str, Any]] = None
     discussion: List[DiscussionItem] = []
 
+    @classmethod
+    def from_mongo(cls, data: Dict[str, Any]) -> 'DataModel':
+        data['id'] = str(data['_id'])
+        del data['_id']
+        return cls(**data)
+
 # Save data to the database
 def save_data(data: Dict[str, Any]) -> Optional[str]:
-    data['id'] = str(uuid.uuid4())
     try:
         parsed_data = DataModel(**data)
-        insert_result = collection.insert_one(parsed_data.model_dump())
-        return parsed_data.id
+        inserted_data = collection.insert_one(parsed_data.model_dump())
+        return str(inserted_data.inserted_id)
     except Exception as e:
         print(e)
         return None
 
 # Get data from the database by submission_id
 def get_data_by_id(id: str) -> DataModel:
-    data = collection.find_one({"id": id})
-    return DataModel(**data).model_dump() if data else None
+    print(id)
+    all_data = collection.find()
+    for item in all_data:
+        print(item)
+    data = collection.find_one({"_id": ObjectId(id)})
+    print(data)
+    return DataModel.from_mongo(data).model_dump() if data else None
 
 # Add a discussion item to the data
 def add_discussion_item(id: str, discussion_item: Dict[str, Any]) -> bool:
     discussion_item['timestamp'] = datetime.now()
     parsed_item = DiscussionItem(**discussion_item)
     result = collection.update_one(
-        {"id": id},
+        {"_id": ObjectId(id)},
         {"$push": {"discussion": parsed_item.model_dump()}}
     )
     return result.modified_count > 0
@@ -58,15 +67,9 @@ def add_discussion_item(id: str, discussion_item: Dict[str, Any]) -> bool:
 # get all data from the database
 def get_all_data() -> List[DataModel]:
     data = collection.find()
-    return [DataModel(**d).model_dump() for d in data]
+    return [DataModel.from_mongo(item).model_dump() for item in data]
 
 # delete all data from the database
 def delete_all_data() -> bool:
     result = collection.delete_many({})
     return result.deleted_count > 0
-
-
-
-
-
-
