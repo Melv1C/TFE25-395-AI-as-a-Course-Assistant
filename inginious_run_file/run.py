@@ -11,7 +11,7 @@ with open("task.yaml", "r") as f:
 
 
 if __name__ == "__main__":
-    question = task["context"]
+    question = task["problems"]["code"]["header"]
     input_student = input.get_input("code")
 
     feedback.set_global_result("failed")
