@@ -1,2 +1,2 @@
 from .myClass import AICourseAssistant
-from .utils import toRST, AIFeedbackBlock
+from .utils import toRST, AIFeedbackBlock, AsyncFeedbackBlock

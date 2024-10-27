@@ -39,12 +39,12 @@ class AICourseAssistant:
         }
         try:
             if isAsync:
-                response = requests.post(f"${AICourseAssistant.server_url}/getFeedbackAsync", json=self.data, headers=headers, timeout=timeout)
+                response = requests.post(f"{AICourseAssistant.server_url}/getFeedbackAsync", json=self.data, headers=headers, timeout=timeout)
             else:
-                response = requests.post(f"${AICourseAssistant.server_url}/getFeedbackSync", json=self.data, headers=headers, timeout=timeout)
+                response = requests.post(f"{AICourseAssistant.server_url}/getFeedbackSync", json=self.data, headers=headers, timeout=timeout)
 
             if response.status_code == 200 or response.status_code == response.json()['code']:
-                return MyResponse.parse(response.json())
+                return MyResponse.parse(isAsync, response.json())
             else:
                 return MyResponse(False, f"{response.status_code} - {response.reason}")
         except requests.exceptions.Timeout:

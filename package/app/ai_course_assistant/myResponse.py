@@ -1,25 +1,31 @@
 class MyResponse:
     def __init__(self, success, message) -> None:
-        self.success = success      # boolean
-        self.message = message      # string
+        self.success = success          # boolean
+        self.message = message          # string
 
     @staticmethod
-    def parse(response: dict) -> 'MyResponse':
+    def parse(isAsync: bool, response: dict) -> 'MyResponse':
         success = (response.get('code', 0) == 200)
-        message = response.get('data') if success else response.get('message')
 
-        return MyResponse(
-            success=success,
-            message=message
-        )
+        if not success:
+            return ErrorResponse(response.get('message'))
+        
+        if isAsync:
+            return AsyncResponse(response.get('data'))
+        else:
+            return SyncResponse(response.get('data'))
+    
+class AsyncResponse(MyResponse):
+    def __init__(self, id) -> None:
+        super().__init__(True, f"Get the feedback using the id: {id}")
+        self.id = id
 
-    def json(self) -> dict:
-        return {
-            "success": self.success,
-            "message": self.message
-        }
+class SyncResponse(MyResponse):
+    def __init__(self, feedback) -> None:
+        super().__init__(True, "Feedback received")
+        self.feedback = feedback
 
-    def __str__(self) -> str:
-        if self.success:
-            return f"Success: {self.message}"
-        return f"Error: {self.message}"
+class ErrorResponse(MyResponse):
+    def __init__(self, message) -> None:
+        super().__init__(False, message)
+
