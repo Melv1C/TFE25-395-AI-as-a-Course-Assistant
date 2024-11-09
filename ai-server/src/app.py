@@ -1,18 +1,16 @@
 import os
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 
 from AI.OpenAI import get_response
 from database import save_data, get_data_by_id, add_discussion_item, get_all_data, delete_all_data
+from prompts import generate_prompt
 
 def INFO(message):
     print(f"[INFO] {message}")
 
 def ERROR(message):
     print(f"[ERROR] {message}")
-
-    
-def generate_prompt(question, student_input):
-    return f"Question: {question}\nStudent's Answer: {student_input}\nProvide feedback on the student's answer."
 
 PORT = os.getenv('PORT', 5000)
 ACCESS_TOKEN = os.getenv('ACCESS_TOKEN', None)
@@ -31,6 +29,7 @@ class MyResponse:
         }
 
 app = Flask(__name__)
+CORS(app)
 
 class RequestParser:
     def __init__(self, data):
@@ -106,7 +105,7 @@ def get_feedback_async_by_id(id):
         res = MyResponse(404, "Data not found")
         return jsonify(res.json()), 404
     
-    prompt = generate_prompt(data['question'], data['student_input'])
+    prompt = generate_prompt(data)
     add_discussion_item(id, {"role": "teacher", "message": prompt})
 
     chatbot_response = get_response(prompt)
@@ -141,7 +140,7 @@ def get_feedback_sync():
         res = MyResponse(404, "Data not found")
         return jsonify(res.json()), 404
 
-    prompt = generate_prompt(data['question'], data['student_input'])
+    prompt = generate_prompt(data)
     add_discussion_item(data_id, {"role": "teacher", "message": prompt})
 
     chatbot_response = get_response(prompt)
