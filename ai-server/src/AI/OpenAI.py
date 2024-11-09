@@ -58,7 +58,7 @@ def get_response(prompt):
     print(f"New Discussion: tokens_used={tokens_used}, input_tokens={input_tokens}, output_tokens={output_tokens}")
     print(f"Total Usage: tokens_used={tokens_used}, input_tokens={input_tokens}, output_tokens={output_tokens}, discussions={discussions}")
     print(f"Mean Usage: tokens_used={tokens_used/discussions}, input_tokens={input_tokens/discussions}, output_tokens={output_tokens/discussions}")
-    
-    save_token_usage(today, tokens_used)
+
+    save_token_usage(today, tokens_used, input_tokens, output_tokens, discussions)
 
     return res.choices[0].message.content
