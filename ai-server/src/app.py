@@ -105,6 +105,14 @@ def get_feedback_async_by_id(id):
         res = MyResponse(404, "Data not found")
         return jsonify(res.json()), 404
     
+    # Check if an 'ai' role response already exists in the discussion
+    ai_feedback = next((item['message'] for item in data['discussion'] if item['role'] == 'ai'), None)
+    
+    if ai_feedback:
+        # Directly return the existing AI feedback
+        res = MyResponse(200, "Success", ai_feedback)
+        return jsonify(res.json())
+
     prompt = generate_prompt(data)
     add_discussion_item(id, {"role": "teacher", "message": prompt})
 
