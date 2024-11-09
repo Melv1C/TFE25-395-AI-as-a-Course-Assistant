@@ -38,26 +38,41 @@ def AIFeedbackBlock(feedback):
 
 
 def AsyncFeedbackBlock(url, id):
-    """ Generate an HTML block with a button to get AI feedback asynchronously """
+    """ Generate an HTML block with a styled button to get AI feedback asynchronously """
     return f'''
 .. raw:: html
     
-        <div>
-            <h4>AI Feedback</h4>
-            <button class="btn btn-primary" onclick="getFeedback()">Get Feedback</button>
-            <div id="feedback"></div>
+        <div style="font-family: Arial, sans-serif; max-width: 300px; margin-top: 20px;">
+            <h4>Do you need further explanation?</h4>
+            <button class="btn btn-primary" style="padding: 8px 12px; border-radius: 5px; border: none; background-color: #007bff; color: white; cursor: pointer;" onclick="getFeedback()">Ask feedback from an AI</button>
+            <div id="feedback" style="margin-top: 15px; font-size: 14px;"></div>
         </div>
 
         <script>
             function getFeedback() {{
+                document.getElementById('feedback').innerHTML = '<div class="loading-circle" style="display: inline-block; width: 24px; height: 24px; border: 3px solid #007bff; border-top: 3px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>';
+                
                 fetch('{url}/getFeedbackAsync/{id}')
                     .then(response => response.json())
                     .then(data => {{
-                        document.getElementById('feedback').innerHTML = data.feedback;
+                        document.getElementById('feedback').innerHTML = '<div style="display: inline-block; background-color: #f1f0f0; color: #333; padding: 10px; border-radius: 10px; max-width: 90%; margin-top: 10px; font-size: 14px;">' + data.feedback + '</div>';
                     }})
                     .catch(error => {{
                         console.error('Error:', error);
+                        document.getElementById('feedback').innerHTML = '<div style="color: red;">Failed to load feedback. Please try again.</div>';
                     }});
             }}
-'''
+
+            // CSS for the loading spinner
+            const style = document.createElement('style');
+            style.innerHTML = `
+                @keyframes spin {{
+                    0% {{ transform: rotate(0deg); }}
+                    100% {{ transform: rotate(360deg); }}
+                }}
+            `;
+            document.head.appendChild(style);
+        </script>
+    '''
+
 

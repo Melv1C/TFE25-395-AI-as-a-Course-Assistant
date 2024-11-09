@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: ai_course_assistant
-Version: 1.2.0
+Version: 1.2.1
 Summary: A course assistant that provides feedback on student answers using a chatbot.
 Author: Claes Melvyn
 Author-email: melvyn.claes@student.uclouvain.be
@@ -15,7 +15,7 @@ Requires-Dist: twine; extra == "dev"
 
 # AI Course Assistant
 
-The AI Course Assistant Python package is designed to facilitate communication between INGInious and a serve. This assistant simplifies the process by automating the exchange of information such as questions, student responses, grades, â€¦
+The AI Course Assistant Python package is designed to facilitate communication between INGInious and a serve. This assistant simplifies the process by automating the exchange of information such as questions, student responses, grades, ...
 
 ## Installation
 
