@@ -55,7 +55,8 @@ def AsyncFeedbackBlock(url, id):
                 fetch('{url}/getFeedbackAsync/{id}')
                     .then(response => response.json())
                     .then(data => {{
-                        document.getElementById('feedback').innerHTML = '<div style="display: inline-block; background-color: #f1f0f0; color: #333; padding: 10px; border-radius: 10px; max-width: 90%; margin-top: 10px; font-size: 14px;">' + data.feedback + '</div>';
+                        console.log(data);
+                        document.getElementById('feedback').innerHTML = '<div style="display: inline-block; background-color: #f1f0f0; color: #333; padding: 10px; border-radius: 10px; max-width: 90%; margin-top: 10px; font-size: 14px;">' + data.data + '</div>';
                     }})
                     .catch(error => {{
                         console.error('Error:', error);

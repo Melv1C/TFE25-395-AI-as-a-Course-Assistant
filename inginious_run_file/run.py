@@ -1,5 +1,5 @@
 import yaml
-from ai_course_assistant import AICourseAssistant, AIFeedbackBlock
+from ai_course_assistant import AICourseAssistant, AIFeedbackBlock, AsyncFeedbackBlock
 
 from inginious_container_api import feedback, input
 
@@ -20,9 +20,9 @@ if __name__ == "__main__":
 
     AICourseAssistant.init(URL)
     assistant = AICourseAssistant(question, input_student)
-    res = assistant.getFeedbackSync()
+    res = assistant.getFeedbackAsync()
     if res.success:
-        feedback.set_global_feedback(AIFeedbackBlock(res.feedback), True)
+        feedback.set_global_feedback(AsyncFeedbackBlock(URL, res.id))
     else:
         print("Error:", res.message)
         feedback.set_global_feedback("An error occurred while asking for an AI feedback.", True)
