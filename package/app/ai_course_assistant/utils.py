@@ -44,15 +44,15 @@ def AsyncFeedbackBlock(url, id):
     
         <div style="font-family: Arial, sans-serif; max-width: 300px; margin-top: 20px;">
             <h4>Do you need further explanation?</h4>
-            <button class="btn btn-primary" style="padding: 8px 12px; border-radius: 5px; border: none; background-color: #007bff; color: white; cursor: pointer;" onclick="getFeedback()">Ask feedback from an AI</button>
+            <button class="btn btn-primary" style="padding: 8px 12px; border-radius: 5px; border: none; background-color: #007bff; color: white; cursor: pointer;" onclick="getFeedback('{id}')">Ask feedback from an AI</button>
             <div id="feedback" style="margin-top: 15px; font-size: 14px;"></div>
         </div>
 
         <script>
-            function getFeedback() {{
+            function getFeedback(id) {{
                 document.getElementById('feedback').innerHTML = '<div class="loading-circle" style="display: inline-block; width: 24px; height: 24px; border: 3px solid #007bff; border-top: 3px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>';
                 
-                fetch('{url}/getFeedbackAsync/{id}')
+                fetch('{url}/getFeedbackAsync/' + id)
                     .then(response => response.json())
                     .then(data => {{
                         console.log(data);
