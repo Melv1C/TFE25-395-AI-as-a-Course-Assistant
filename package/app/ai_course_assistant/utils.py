@@ -38,45 +38,129 @@ def AIFeedbackBlock(feedback):
 
 
 def AsyncFeedbackBlock(url, id):
-    """ Generate an HTML block with a styled button to get AI feedback asynchronously """
+    """Generate an HTML block with AI feedback, a gradient header, and a thumbs up/down feedback system."""
     return f'''
 .. raw:: html
-    
-        <div style="font-family: Arial, sans-serif; max-width: 500px; margin-top: 20px;">
-            <button id="feedbackButton" class="btn btn-primary" style="padding: 8px 12px; border-radius: 5px; border: none; background-color: #007bff; color: white; cursor: pointer;" onclick="getFeedback('{id}')">Ask feedback from an AI</button>
-            <div id="feedback" style="margin-top: 15px; font-size: 14px;"></div>
-        </div>
 
-        <script>
-            function getFeedback(id) {{
+    <div style="font-family: Arial, sans-serif; max-width: 500px; margin-top: 20px;">
+        <button id="feedbackButton" class="feedback-btn" onclick="getFeedback('{id}')">Ask feedback from an AI</button>
+        
+        <div id="feedback" class="feedback-output" style="display: none;">
+            <!-- Feedback content including header and message -->
+            <div id="feedbackHeader" class="feedback-header">
+                AI Course Assistant
+            </div>
             
-                document.getElementById('feedbackButton').style.display = 'none';
+            <div id="feedbackContent" class="feedback-text"></div>
+        </div>
+        
+        <div id="feedbackRating" class="feedback-rating" style="display: none; align-items: center; justify-content: center; margin-top: 10px;">
+            <div>Was the feedback useful?</div>
+            <button onclick="sendFeedbackRating('{id}', true)" class="thumb-up">👍</button>
+            <button onclick="sendFeedbackRating('{id}', false)" class="thumb-down">👎</button>
+            <div id="ratingResponse" style="margin-top: 5px; font-size: 14px;"></div>
+        </div>
+    </div>
 
-                document.getElementById('feedback').innerHTML = '<div class="loading-circle" style="display: inline-block; width: 24px; height: 24px; border: 3px solid #007bff; border-top: 3px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>';
-                
-                fetch('{url}/getFeedbackAsync/' + id)
-                    .then(response => response.json())
-                    .then(data => {{
-                        console.log(data);
-                        document.getElementById('feedback').innerHTML = '<div style="display: inline-block; background-color: #f1f0f0; color: #333; padding: 10px; border-radius: 10px; max-width: 90%; margin-top: 10px; font-size: 14px;">' + data.data + '</div>';
-                    }})
-                    .catch(error => {{
-                        console.error('Error:', error);
-                        document.getElementById('feedback').innerHTML = '<div style="color: red;">Failed to load feedback. Please try again.</div>';
-                        document.getElementById('feedbackButton').style.display = 'block';
-                    }});
+    <script>
+        function getFeedback(id) {{
+            const feedbackButton = document.getElementById('feedbackButton');
+            const feedback = document.getElementById('feedback');
+            const feedbackContent = document.getElementById('feedbackContent');
+            const feedbackRating = document.getElementById('feedbackRating');
+            
+            // Hide button and show loading spinner
+            feedbackButton.style.display = 'none';
+            feedback.style.display = 'block'; // Show feedback block
+            feedbackContent.innerHTML = '<div class="loading-circle"></div>';
+            feedbackContent.style.display = 'block';
+
+            fetch('{url}/getFeedbackAsync/' + encodeURIComponent(id))
+                .then(response => response.json())
+                .then(data => {{
+                    feedbackContent.innerHTML = data.data; // Show feedback message
+                    feedbackRating.style.display = 'flex'; // Show thumbs up/down buttons
+                }})
+                .catch(error => {{
+                    console.error('Error:', error);
+                    feedbackContent.innerHTML = '<div class="feedback-error">Failed to load feedback.</div>';
+                    //feedbackButton.style.display = 'flex';
+                }});
+        }}
+
+        function sendFeedbackRating(id, isUseful) {{
+            fetch('{url}/getFeedbackAsync/' + encodeURIComponent(id), {{
+                method: 'POST',
+                headers: {{
+                    'Content-Type': 'application/json'
+                }},
+                body: JSON.stringify({{ useful: isUseful }})
+            }})
+            .then(response => response.json())
+            .then(data => {{
+                document.getElementById('ratingResponse').innerHTML = 'Thank you for your feedback!';
+                document.getElementById('feedbackRating').style.display = 'none';
+            }})
+            .catch(error => {{
+                console.error('Error:', error);
+                document.getElementById('ratingResponse').innerHTML = '<div style="color: red;">Error submitting feedback. Please try again.</div>';
+            }});
+        }}
+
+        // CSS styles for components
+        const style = document.createElement('style');
+        style.innerHTML = `
+            .feedback-btn {{
+                padding: 8px 12px;
+                border-radius: 5px;
+                border: none;
+                background: linear-gradient(90deg, rgb(76, 27, 107) 0%, rgb(176, 132, 204) 58%, rgb(86, 221, 249) 100%);
+                color: white;
+                cursor: pointer;
             }}
-
-            // CSS for the loading spinner
-            const style = document.createElement('style');
-            style.innerHTML = `
-                @keyframes spin {{
-                    0% {{ transform: rotate(0deg); }}
-                    100% {{ transform: rotate(360deg); }}
-                }}
-            `;
-            document.head.appendChild(style);
-        </script>
+            .loading-circle {{
+                display: inline-block;
+                width: 24px;
+                height: 24px;
+                border: 3px solid #4c1b6b;
+                border-top: 3px solid transparent;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+            }}
+            .feedback-output {{
+                font-size: 14px;
+                background-color: #f1f0f0;
+                color: #333;
+                border-radius: 10px;
+                overflow: hidden;
+            }}
+            .feedback-text {{
+                padding: 10px;
+            }}
+            .feedback-header {{
+                display: block;
+                padding: 10px;
+                color: white;
+                font-size: 18px;
+                font-weight: bold;
+                text-align: center;
+                background: linear-gradient(90deg, rgb(76, 27, 107) 0%, rgb(176, 132, 204) 58%, rgb(86, 221, 249) 100%);
+            }}
+            .feedback-error {{
+                color: red;
+            }}
+            .thumb-up, .thumb-down {{
+                font-size: 20px;
+                background: none;
+                border: none;
+                cursor: pointer;
+                margin: 0 5px;
+            }}
+            @keyframes spin {{
+                0% {{ transform: rotate(0deg); }}
+                100% {{ transform: rotate(360deg); }}
+            }}
+        `;
+        document.head.appendChild(style);
+    </script>
     '''
-
-
