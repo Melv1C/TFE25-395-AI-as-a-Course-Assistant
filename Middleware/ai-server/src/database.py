@@ -27,6 +27,7 @@ class DataModel(BaseModel):
     model: str = "gpt-4o-mini"
     metadata: Optional[Dict[str, Any]] = None
     discussion: List[DiscussionItem] = []
+    is_useful: Optional[bool] = None
 
     @classmethod
     def from_mongo(cls, data: Dict[str, Any]) -> 'DataModel':
@@ -56,6 +57,14 @@ def add_discussion_item(id: str, discussion_item: Dict[str, Any]) -> bool:
     result = collection.update_one(
         {"_id": ObjectId(id)},
         {"$push": {"discussion": parsed_item.model_dump()}}
+    )
+    return result.modified_count > 0
+
+# Update the usefulness of the feedback
+def update_feedback_usefulness(id: str, is_useful: bool) -> bool:
+    result = collection.update_one(
+        {"_id": ObjectId(id)},
+        {"$set": {"is_useful": is_useful}}
     )
     return result.modified_count > 0
 

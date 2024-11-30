@@ -3,7 +3,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 from AI.OpenAI import get_response
-from database import save_data, get_data_by_id, add_discussion_item, get_all_data, delete_all_data
+from database import save_data, get_data_by_id, add_discussion_item, get_all_data, delete_all_data, update_feedback_usefulness
 from prompts import generate_prompt
 
 def INFO(message):
@@ -120,6 +120,33 @@ def get_feedback_async_by_id(id):
     add_discussion_item(id, {"role": "ai", "message": chatbot_response})
 
     res = MyResponse(200, "Success", chatbot_response)
+    return jsonify(res.json())
+
+@app.route('/getFeedbackAsync/<id>', methods=['POST'])
+def update_feedback_usefulness(id):
+    if not request.is_json:
+        return jsonify(MyResponse(400, "Request must have a JSON body").json()), 400
+    
+    data = request.json
+    INFO(f"Received request with data: {data}")
+
+    is_useful = data.get('useful')
+    if is_useful is None:
+        ERROR("Missing 'useful' field in request body")
+        return jsonify(MyResponse(400, "Missing 'useful' field in request body").json()), 400
+
+    feedback_data = get_data_by_id(id)
+    if feedback_data is None:
+        res = MyResponse(404, "Data not found")
+
+        return jsonify(res.json()), 404
+
+    # Update the usefulness of the feedback
+    if not update_feedback_usefulness(id, is_useful):
+        res = MyResponse(500, "Failed to update feedback usefulness")
+        return jsonify(res.json()), 500
+    
+    res = MyResponse(200, "Success")
     return jsonify(res.json())
 
 @app.route('/getFeedbackSync', methods=['POST'])
