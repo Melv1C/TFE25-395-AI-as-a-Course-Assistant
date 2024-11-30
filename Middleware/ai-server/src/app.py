@@ -3,7 +3,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 from AI.OpenAI import get_response
-from database import save_data, get_data_by_id, add_discussion_item, get_all_data, delete_all_data, update_feedback_usefulness
+from database import save_data, get_data_by_id, add_discussion_item, get_all_data, delete_all_data, update_usefulness
 from prompts import generate_prompt
 
 def INFO(message):
@@ -142,7 +142,7 @@ def update_feedback_usefulness(id):
         return jsonify(res.json()), 404
 
     # Update the usefulness of the feedback
-    if not update_feedback_usefulness(id, is_useful):
+    if not update_usefulness(id, is_useful):
         res = MyResponse(500, "Failed to update feedback usefulness")
         return jsonify(res.json()), 500
     

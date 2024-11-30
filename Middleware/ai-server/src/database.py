@@ -61,7 +61,7 @@ def add_discussion_item(id: str, discussion_item: Dict[str, Any]) -> bool:
     return result.modified_count > 0
 
 # Update the usefulness of the feedback
-def update_feedback_usefulness(id: str, is_useful: bool) -> bool:
+def update_usefulness(id: str, is_useful: bool) -> bool:
     result = collection.update_one(
         {"_id": ObjectId(id)},
         {"$set": {"is_useful": is_useful}}
