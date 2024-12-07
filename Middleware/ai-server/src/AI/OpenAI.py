@@ -11,8 +11,8 @@ assert OPENAI_API_KEY, "Missing OPENAI_API_KEY environment"
 
 MODEL = "gpt-4o-mini"
 TOTAL_TOKEN_LIMIT = int(os.getenv("TOKEN_LIMIT", 1000000)) 
-INPUT_TOKEN_LIMIT = int(os.getenv("INPUT_TOKEN_LIMIT", 500000))  # 0.15$ / 1M tokens => 0.075$ / day
-OUTPUT_TOKEN_LIMIT = int(os.getenv("OUTPUT_TOKEN_LIMIT", 100000)) # 0.60$ / 1M tokens => 0.06$ / day => 0.135$ / day
+INPUT_TOKEN_LIMIT = int(os.getenv("INPUT_TOKEN_LIMIT", 10000000))  # 0.15$ / 1M tokens => 1.50$ / day
+OUTPUT_TOKEN_LIMIT = int(os.getenv("OUTPUT_TOKEN_LIMIT", 1000000)) # 0.60$ / 1M tokens => 0.60$ / day => 2.10$ / day
 USAGE_FILE = "token_usage.json"
 
 openai = OpenAI(api_key=OPENAI_API_KEY)
@@ -55,9 +55,9 @@ def get_response(prompt):
     output_tokens += res.usage.completion_tokens
     discussions += 1
 
-    print(f"New Discussion: tokens_used={tokens_used}, input_tokens={input_tokens}, output_tokens={output_tokens}")
-    print(f"Total Usage: tokens_used={tokens_used}, input_tokens={input_tokens}, output_tokens={output_tokens}, discussions={discussions}")
-    print(f"Mean Usage: tokens_used={tokens_used/discussions}, input_tokens={input_tokens/discussions}, output_tokens={output_tokens/discussions}")
+    # print(f"New Discussion: tokens_used={tokens_used}, input_tokens={input_tokens}, output_tokens={output_tokens}")
+    # print(f"Total Usage: tokens_used={tokens_used}, input_tokens={input_tokens}, output_tokens={output_tokens}, discussions={discussions}")
+    # print(f"Mean Usage: tokens_used={tokens_used/discussions}, input_tokens={input_tokens/discussions}, output_tokens={output_tokens/discussions}")
 
     save_token_usage(today, tokens_used, input_tokens, output_tokens, discussions)
 

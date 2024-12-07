@@ -1,9 +1,9 @@
 import yaml
 from ai_course_assistant import AICourseAssistant, AsyncFeedbackBlock
-from inginious_container_api import feedback, input, run_student
+from inginious_container_api import feedback, input, run_student, rst
 
 # URL of the AI assistant service
-URL = "http://tfe-claes.info.ucl.ac.be"
+URL = "https://tfe-claes.info.ucl.ac.be"
 
 # Load the task details from the YAML file
 with open("task.yaml", "r") as f:
@@ -76,7 +76,7 @@ def run_unit_tests():
             test(n)
         except AssertionError as e:
             feedback.set_global_result("failed")
-            feedback.set_global_feedback(str(e))
+            feedback.set_global_feedback(rst.get_codeblock('bash',str(e)))
             feedback.set_grade(0)
             request_ai_feedback()
             return

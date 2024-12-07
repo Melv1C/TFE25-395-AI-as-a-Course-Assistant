@@ -2,13 +2,30 @@ services:
   mongodb:
     image: mongo:latest
     container_name: mongodb
+    restart: always
     volumes:
       - mongo_data:/data/db
     networks:
       - middleware
 
+  mongo-express:
+    image: mongo-express:latest
+    container_name: mongo-express
+    restart: always
+    ports:
+      - "8443:8081"
+    depends_on:
+      - mongodb
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongodb
+      ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_EXPRESS_USERNAME}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_EXPRESS_PASSWORD}
+    networks:
+      - middleware
+
   ai-server:
     build: ./ai-server
+    restart: always
     ports:
       - "5000:5000"
     depends_on:
@@ -16,6 +33,8 @@ services:
     environment:
       MONGO_URI: mongodb://mongodb:27017
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+    volumes:
+      - ./token_usage.json:/app/token_usage.json
     networks:
       - middleware
 
