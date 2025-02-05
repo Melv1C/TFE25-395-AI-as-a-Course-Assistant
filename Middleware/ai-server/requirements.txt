@@ -4,3 +4,4 @@ openai==1.55.3
 pymongo==4.10.1
 pydantic==2.9.2
 python-dotenv==1.0.1
+pylint==3.3.4
