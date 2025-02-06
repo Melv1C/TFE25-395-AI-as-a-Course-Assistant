@@ -33,8 +33,7 @@ services:
     environment:
       MONGO_URI: mongodb://mongodb:27017
       OPENAI_API_KEY: ${OPENAI_API_KEY}
-    volumes:
-      - ./token_usage.json:/app/token_usage.json
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
     networks:
       - middleware
 

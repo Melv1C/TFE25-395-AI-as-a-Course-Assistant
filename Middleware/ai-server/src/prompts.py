@@ -1,3 +1,5 @@
+from global_types import RequestModel
+
 def system_prompt():
     return """
 Vous êtes un assistant expert en programmation conçu pour guider les étudiants dans leurs exercices. Votre mission est d'aider l'étudiant à comprendre le problème et à progresser de manière autonome en proposant des conseils, des pistes et des questions sans jamais fournir directement la solution.
@@ -23,15 +25,15 @@ Vous êtes un assistant expert en programmation conçu pour guider les étudiant
 Maintenant, préparez-vous à guider l’étudiant. 
 """
 
-def generate_prompt(data):
+def generate_prompt(data: RequestModel) -> str:
     return f"""
 La question est la suivante : 
 <Var>
-{data["question"]}
+{data.question}
 </Var>
 
 Le code de l'étudiant est le suivant : 
 <Var>
-{data["student_input"]}
+{data.student_input}
 </Var>
 """

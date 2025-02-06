@@ -1,13 +1,12 @@
 """
 OpenAI Client Module.
 
-Handles interactions with OpenAI's API, including token usage tracking and request handling.
+Handles interactions with OpenAI's API.
 """
 
 import os
 from dotenv import load_dotenv
 from openai import OpenAI
-from prompts import system_prompt
 
 # Load environment variables
 load_dotenv()
@@ -19,7 +18,7 @@ MODEL = "gpt-4o-mini"
 
 openai = OpenAI(api_key=OPENAI_API_KEY)
 
-def get_response(prompt: str) -> str:
+def get_response(prompt: str, system_prompt: str) -> str:
     """
     Generate a response using OpenAI's API.
 
@@ -34,7 +33,7 @@ def get_response(prompt: str) -> str:
     response = openai.chat.completions.create(
         model=MODEL,
         messages=[
-            {"role": "system", "content": system_prompt()},
+            {"role": "system", "content": system_prompt},
             {"role": "user", "content": prompt},
         ],
     )

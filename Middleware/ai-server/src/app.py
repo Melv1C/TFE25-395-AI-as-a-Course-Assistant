@@ -2,13 +2,14 @@
 import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from pydantic import ValidationError
 
-from ai.open_ai import get_response
+from global_types import RequestModel, AIEnum
 from database import (
-    save_data, get_data_by_id, add_discussion_item,
-    get_all_data, delete_all_data, update_usefulness
+    save_data, get_data_by_id, update_usefulness
 )
-from ai.prompts import generate_prompt
+from ai_handler import get_response_by_ai
+
 
 def info(message):
     """Logs an info message to the console."""
@@ -44,6 +45,7 @@ class RequestParser:
 
     def __init__(self, data):
         self.data = data
+        self.ai = data.get('ai') or AIEnum.openai
         self.question = data.get('question')
         self.student_input = data.get('student_input')
 
@@ -70,54 +72,33 @@ def home():
     res = MyResponse(200, "Welcome to the AI Course Assistant API!")
     return jsonify(res.json())
 
-@app.route('/database', methods=['GET'])
-def get_database():
-    """Retrieves all stored data."""
-    data = get_all_data()
-    res = MyResponse(200, "Success", data)
-    return jsonify(res.json())
 
-@app.route('/database', methods=['DELETE'])
-def delete_database():
-    """Deletes all stored data (requires authorization)."""
-    if not check_access_token(request.headers):
-        error("Unauthorized access")
-        return jsonify(MyResponse(401, "Unauthorized access").json()), 401
-
-    if delete_all_data():
-        res = MyResponse(200, "Success")
-        return jsonify(res.json())
-
-    res = MyResponse(500, "Failed to delete data")
-    return jsonify(res.json()), 500
-
-@app.route('/getFeedbackAsync', methods=['POST'])
-def get_feedback_async():
-    """Handles asynchronous feedback request."""
+@app.route('/get_feedback', methods=['POST'])
+def get_feedback():
+    """Handles feedback request."""
     if not request.is_json:
         return jsonify(MyResponse(400, "Request must have a JSON body").json()), 400
 
-    data = request.json
-    info(f"Received request with data: {data}")
-
     if not check_access_token(request.headers):
         error("Unauthorized access")
         return jsonify(MyResponse(401, "Unauthorized access").json()), 401
 
-    parser = RequestParser(data)
+    info(f"Received request with data: {request.json}")
 
-    if not parser.is_valid():
-        error("Missing question or student input")
-        return jsonify(MyResponse(400, "Missing question or student input").json()), 400
+    try:
+        data = RequestModel(**request.json)
+        data_id = save_data(data)
+        res = MyResponse(200, "Success", data_id)
+        return jsonify(res.json())
+    except ValidationError as e:
+        error(f"Invalid request: {e}")
+        return jsonify(MyResponse(400, "Invalid request").json()), 400
+    except Exception as e:
+        error(f"Internal server error: {e}")
+        return jsonify(MyResponse(500, "Internal server error").json()), 500
 
-    # Save data to the database
-    data_id = save_data(parser.data)
-
-    res = MyResponse(200, "Success", data_id)
-    return jsonify(res.json())
-
-@app.route('/getFeedbackAsync/<feedback_id>', methods=['GET'])
-def get_feedback_async_by_id(feedback_id):
+@app.route('/get_feedback/<feedback_id>', methods=['GET'])
+def get_feedback_by_id(feedback_id):
     """Retrieves AI-generated feedback by ID."""
     data = get_data_by_id(feedback_id)
     if data is None:
@@ -135,16 +116,12 @@ def get_feedback_async_by_id(feedback_id):
         res = MyResponse(200, "Success", ai_feedback)
         return jsonify(res.json())
 
-    prompt = generate_prompt(data)
-    add_discussion_item(feedback_id, {"role": "teacher", "message": prompt})
-
-    chatbot_response = get_response(prompt)
-    add_discussion_item(feedback_id, {"role": "ai", "message": chatbot_response})
+    chatbot_response = get_response_by_ai(data)
 
     res = MyResponse(200, "Success", chatbot_response)
     return jsonify(res.json())
 
-@app.route('/getFeedbackAsync/<feedback_id>', methods=['POST'])
+@app.route('/get_feedback/<feedback_id>', methods=['POST'])
 def update_feedback_usefulness(feedback_id):
     """Updates the usefulness rating of feedback."""
     if not request.is_json:
@@ -170,42 +147,6 @@ def update_feedback_usefulness(feedback_id):
         return jsonify(res.json()), 500
 
     res = MyResponse(200, "Success")
-    return jsonify(res.json())
-
-@app.route('/getFeedbackSync', methods=['POST'])
-def get_feedback_sync():
-    """Handles synchronous feedback request."""
-    if not request.is_json:
-        return jsonify(MyResponse(400, "Request must have a JSON body").json()), 400
-
-    data = request.json
-    info(f"Received request with data: {data}")
-
-    if not check_access_token(request.headers):
-        error("Unauthorized access")
-        return jsonify(MyResponse(401, "Unauthorized access").json()), 401
-
-    parser = RequestParser(data)
-
-    if not parser.is_valid():
-        error("Missing question or student input")
-        return jsonify(MyResponse(400, "Missing question or student input").json()), 400
-
-    # Save data to the database
-    data_id = save_data(parser.data)
-
-    data = get_data_by_id(data_id)
-    if data is None:
-        res = MyResponse(404, "Data not found")
-        return jsonify(res.json()), 404
-
-    prompt = generate_prompt(data)
-    add_discussion_item(data_id, {"role": "teacher", "message": prompt})
-
-    chatbot_response = get_response(prompt)
-    add_discussion_item(data_id, {"role": "ai", "message": chatbot_response})
-
-    res = MyResponse(200, "Success", chatbot_response)
     return jsonify(res.json())
 
 if __name__ == "__main__":
