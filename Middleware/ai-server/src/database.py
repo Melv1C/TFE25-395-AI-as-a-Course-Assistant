@@ -57,8 +57,10 @@ def add_discussion_item(data_id: str, discussion_item: Dict[str, Any]) -> bool:
         return result.modified_count > 0
     except PyMongoError as e:
         print(f"[ERROR] Failed to add discussion item: {e}")
+        raise e
     except ValueError as e:
         print(f"[ERROR] Invalid discussion item format: {e}")
+        raise e
     return False
 
 def update_usefulness(data_id: str, is_useful: bool) -> bool:
