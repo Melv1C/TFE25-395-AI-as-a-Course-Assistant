@@ -4,7 +4,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from pydantic import ValidationError
 
-from global_types import RequestModel, AIEnum
+from global_types import RequestModel, AIEnum, RoleEnum
 from database import (
     save_data, get_data_by_id, update_usefulness
 )
@@ -107,7 +107,7 @@ def get_feedback_by_id(feedback_id):
 
     # Check if an 'ai' role response already exists in the discussion
     ai_feedback = next(
-        (item['message'] for item in data['discussion'] if item['role'] == 'ai'),
+        (item.message for item in data.discussion if item.role == RoleEnum.ai),
         None
     )
 

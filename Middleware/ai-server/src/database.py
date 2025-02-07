@@ -11,7 +11,7 @@ from typing import List, Optional, Dict, Any
 from pymongo import MongoClient
 from pymongo.errors import PyMongoError
 from bson import ObjectId
-from pydantic import BaseModel
+from global_types import DataModel, DiscussionItem, RequestModel
 
 # Load environment variables
 MONGO_URI = os.getenv('MONGO_URI', 'mongodb://localhost:27017')
@@ -23,31 +23,7 @@ client = MongoClient(MONGO_URI)
 db = client[MONGO_DB]
 collection = db[MONGO_COLLECTION]
 
-class DiscussionItem(BaseModel):
-    """Represents a discussion entry in the database."""
-    role: str
-    message: str
-    timestamp: datetime
-
-class DataModel(BaseModel):
-    """Represents the main data model stored in the database."""
-    id: Optional[str] = None
-    question: str
-    student_input: str
-    custom_prompt: Optional[str] = None
-    model: str = "gpt-4o-mini"
-    metadata: Optional[Dict[str, Any]] = None
-    discussion: List[DiscussionItem] = []
-    is_useful: Optional[bool] = None
-
-    @classmethod
-    def from_mongo(cls, data: Dict[str, Any]) -> 'DataModel':
-        """Converts MongoDB document to a DataModel instance."""
-        data['id'] = str(data['_id'])
-        del data['_id']
-        return cls(**data)
-
-def save_data(data: Dict[str, Any]) -> Optional[str]:
+def save_data(data: RequestModel) -> Optional[str]:
     """Saves data to the database and returns the inserted ID."""
     try:
         parsed_data = DataModel(**data)
@@ -59,11 +35,11 @@ def save_data(data: Dict[str, Any]) -> Optional[str]:
         print(f"[ERROR] Invalid data format: {e}")
     return None
 
-def get_data_by_id(data_id: str) -> Optional[Dict[str, Any]]:
+def get_data_by_id(data_id: str) -> Optional[DataModel]:
     """Retrieves data by ID from the database."""
     try:
         data = collection.find_one({"_id": ObjectId(data_id)})
-        return DataModel.from_mongo(data).model_dump() if data else None
+        return DataModel.from_mongo(data) if data else None
     except PyMongoError as e:
         print(f"[ERROR] Failed to retrieve data by ID: {e}")
     return None
@@ -96,11 +72,11 @@ def update_usefulness(data_id: str, is_useful: bool) -> bool:
         print(f"[ERROR] Failed to update feedback usefulness: {e}")
     return False
 
-def get_all_data() -> List[Dict[str, Any]]:
+def get_all_data() -> List[DataModel]:
     """Retrieves all stored data from the database."""
     try:
         data = collection.find()
-        return [DataModel.from_mongo(item).model_dump() for item in data]
+        return [DataModel.from_mongo(item) for item in data]
     except PyMongoError as e:
         print(f"[ERROR] Failed to retrieve all data: {e}")
     return []
