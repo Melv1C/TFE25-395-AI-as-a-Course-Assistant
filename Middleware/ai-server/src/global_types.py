@@ -1,3 +1,4 @@
+from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
 from pydantic import BaseModel
@@ -25,7 +26,7 @@ class DiscussionItem(BaseModel):
     """Represents a discussion entry in the database."""
     role: RoleEnum
     message: str
-    timestamp: str
+    timestamp: datetime
 
 
 class DataModel(RequestModel):
