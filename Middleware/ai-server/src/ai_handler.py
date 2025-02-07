@@ -17,6 +17,11 @@ def get_response_by_ai(data: DataModel) -> str:
         str: The AI-generated response.
     """
 
+    print(f"Data ID: {data.id}")
+    if data.id is None:
+        raise ValueError("Data ID is required to get feedback by ID.")
+    
+
     prompt = generate_prompt(data)
 
     add_discussion_item(data.id, {"role": RoleEnum.system, "message": system_prompt()})
