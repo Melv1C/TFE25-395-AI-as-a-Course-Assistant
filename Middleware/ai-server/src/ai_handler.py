@@ -23,9 +23,9 @@ def get_response_by_ai(data: DataModel) -> str:
     add_discussion_item(data.id, {"role": RoleEnum.student, "message": prompt})
 
     if data.ai == AIEnum.gemini:
-        chatbot_response = get_response(prompt)
+        chatbot_response = get_response(prompt, system_prompt())
     elif data.ai == AIEnum.openai:
-        chatbot_response = get_response(prompt)
+        chatbot_response = get_response(prompt, system_prompt())
     else:
         raise ValueError(f"Invalid AI type: {data.ai}")
     
