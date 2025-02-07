@@ -26,8 +26,9 @@ collection = db[MONGO_COLLECTION]
 def save_data(data: RequestModel) -> Optional[str]:
     """Saves data to the database and returns the inserted ID."""
     try:
-        parsed_data = DataModel(**data)
+        parsed_data = DataModel(**data.model_dump())
         inserted_data = collection.insert_one(parsed_data.model_dump())
+        print(f"[INFO] Data saved with ID: {inserted_data.inserted_id}")
         return str(inserted_data.inserted_id)
     except PyMongoError as e:
         print(f"[ERROR] Failed to save data: {e}")
