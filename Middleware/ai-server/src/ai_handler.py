@@ -6,7 +6,7 @@ from global_types import DataModel, AIEnum, RoleEnum
 
 from database import add_discussion_item
 
-def get_response_by_ai(data_id: str, data: DataModel) -> str:
+def get_response_by_ai(data: DataModel) -> str:
     """
     Get the response from the AI model based on the request data.
 
@@ -19,8 +19,8 @@ def get_response_by_ai(data_id: str, data: DataModel) -> str:
 
     prompt = generate_prompt(data)
 
-    add_discussion_item(data_id, {"role": RoleEnum.system, "message": system_prompt()})
-    add_discussion_item(data_id, {"role": RoleEnum.student, "message": prompt})
+    add_discussion_item(data.id, {"role": RoleEnum.system, "message": system_prompt()})
+    add_discussion_item(data.id, {"role": RoleEnum.student, "message": prompt})
 
     if data.ai == AIEnum.gemini:
         chatbot_response = get_response(prompt)
@@ -29,7 +29,7 @@ def get_response_by_ai(data_id: str, data: DataModel) -> str:
     else:
         raise ValueError(f"Invalid AI type: {data.ai}")
     
-    add_discussion_item(data_id, {"role": RoleEnum.ai, "message": chatbot_response})
+    add_discussion_item(data.id, {"role": RoleEnum.ai, "message": chatbot_response})
 
     return chatbot_response
 
