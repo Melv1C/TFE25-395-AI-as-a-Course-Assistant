@@ -1,57 +1,19 @@
 """ Main application file for the AI Course Assistant API. """
 import os
-from flask import Flask, request, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 from pydantic import ValidationError
 
-from global_types import RequestModel, AIEnum, RoleEnum
+from global_types import RequestModel, RoleEnum, ResponseModel
 from database import (
-    save_data, get_data_by_id, update_usefulness
+    save_data, get_data_by_id
 )
 from ai_handler import get_response_by_ai
 
-
-def info(message):
-    """Logs an info message to the console."""
-    print(f"[INFO] {message}")
-
-def error(message):
-    """Logs an error message to the console."""
-    print(f"[ERROR] {message}")
+from pymongo.errors import PyMongoError
 
 PORT = int(os.getenv('PORT', '5000'))
 ACCESS_TOKEN = os.getenv('ACCESS_TOKEN', None)
-
-# pylint: disable=too-few-public-methods
-class MyResponse:
-    """Represents a standardized response format for the API."""
-
-    def __init__(self, code, message, data=None):
-        self.code = code
-        self.message = message
-        self.data = data
-
-    def json(self):
-        """Returns the response as a JSON object."""
-        return {
-            "code": self.code,
-            "message": self.message,
-            "data": self.data
-        }
-
-# pylint: disable=too-few-public-methods
-class RequestParser:
-    """Parses and validates the request body for the API."""
-
-    def __init__(self, data):
-        self.data = data
-        self.ai = data.get('ai') or AIEnum.openai
-        self.question = data.get('question')
-        self.student_input = data.get('student_input')
-
-    def is_valid(self):
-        """Checks if the request body is valid."""
-        return bool(self.question and self.student_input)
 
 def check_access_token(request_headers):
     """Checks if the request has a valid access token."""
@@ -62,93 +24,73 @@ def check_access_token(request_headers):
         return False
     return True
 
-
 app = Flask(__name__)
 CORS(app)
 
 @app.route('/', methods=['GET'])
 def home():
     """Returns a welcome message."""
-    res = MyResponse(200, "Welcome to the AI Course Assistant API!")
-    return jsonify(res.json())
+    return jsonify(ResponseModel(message="Welcome to the AI Course Assistant API").model_dump())
 
 
-@app.route('/get_feedback', methods=['POST'])
-def get_feedback():
+@app.route('/feedbacks', methods=['POST'])
+def save_feedback_data():
     """Handles feedback request."""
     if not request.is_json:
-        return jsonify(MyResponse(400, "Request must have a JSON body").json()), 400
+        return jsonify(ResponseModel(message="Request must have a JSON body").model_dump()), 400
 
     if not check_access_token(request.headers):
-        error("Unauthorized access")
-        return jsonify(MyResponse(401, "Unauthorized access").json()), 401
-
-    info(f"Received request with data: {request.json}")
+        return jsonify(ResponseModel(message="Unauthorized").model_dump()), 401
 
     try:
         data = RequestModel(**request.json)
         data_id = save_data(data)
-        res = MyResponse(200, "Success", data_id)
-        return jsonify(res.json())
+        return jsonify(ResponseModel(message="Feedback data saved", data=data_id).model_dump()), 201
     except ValidationError as e:
-        error(f"Invalid request: {e}")
-        return jsonify(MyResponse(400, "Invalid request").json()), 400
+        return jsonify(ResponseModel(message=f"Invalid request: {e}").model_dump()), 400
+    except PyMongoError as e:
+        return jsonify(ResponseModel(message=f"Failed to save data: {e}").model_dump()), 500
     except Exception as e:
-        error(f"Internal server error: {e}")
-        return jsonify(MyResponse(500, "Internal server error").json()), 500
+        return jsonify(ResponseModel(message=f"Internal server error: {e}").model_dump()), 500
 
-@app.route('/get_feedback/<feedback_id>', methods=['GET'])
-def get_feedback_by_id(feedback_id):
+@app.route('/feedbacks/<feedback_id>', methods=['GET'])
+def get_feedback(feedback_id):
     """Retrieves AI-generated feedback by ID."""
-    data = get_data_by_id(feedback_id)
-    if data is None:
-        res = MyResponse(404, "Data not found")
-        return jsonify(res.json()), 404
+    try:
+        data = get_data_by_id(feedback_id)
+        if data is None:
+            return jsonify(ResponseModel(message="Data not found").model_dump()), 404
 
-    # Check if an 'ai' role response already exists in the discussion
-    ai_feedback = next(
-        (item.message for item in data.discussion if item.role == RoleEnum.ai),
-        None
-    )
+        # Check if an 'ai' role response already exists in the discussion
+        ai_feedback = next(
+            (item.message for item in data.discussion if item.role == RoleEnum.ai),
+            None
+        )
 
-    if ai_feedback:
-        # Directly return the existing AI feedback
-        res = MyResponse(200, "Success", ai_feedback)
-        return jsonify(res.json())
+        if ai_feedback is None:
+            return jsonify(ResponseModel(message="AI feedback not found").model_dump()), 404
+        
+        return jsonify(ResponseModel(message="Success", data=ai_feedback).model_dump())
+    except Exception as e:
+        return jsonify(ResponseModel(message=f"Internal server error: {e}").model_dump()), 500
 
-    chatbot_response = get_response_by_ai(data)
+@app.route('/feedbacks/<feedback_id>/generate', methods=['POST'])
+def generate_feedback(feedback_id):
+    """Generates AI feedback for a given feedback ID."""
+    try:
+        data = get_data_by_id(feedback_id)
+        if data is None:
+            return jsonify(ResponseModel(message="Data not found").model_dump()), 404
 
-    res = MyResponse(200, "Success", chatbot_response)
-    return jsonify(res.json())
+        ai_feedback = get_response_by_ai(data)
 
-@app.route('/get_feedback/<feedback_id>', methods=['POST'])
-def update_feedback_usefulness(feedback_id):
-    """Updates the usefulness rating of feedback."""
-    if not request.is_json:
-        return jsonify(MyResponse(400, "Request must have a JSON body").json()), 400
-
-    data = request.json
-    info(f"Received request with data: {data}")
-
-    is_useful = data.get('useful')
-    if is_useful is None:
-        error("Missing 'useful' field in request body")
-        return jsonify(MyResponse(400, "Missing 'useful' field in request body").json()), 400
-
-    feedback_data = get_data_by_id(feedback_id)
-    if feedback_data is None:
-        res = MyResponse(404, "Data not found")
-
-        return jsonify(res.json()), 404
-
-    # Update the usefulness of the feedback
-    if not update_usefulness(feedback_id, is_useful):
-        res = MyResponse(500, "Failed to update feedback usefulness")
-        return jsonify(res.json()), 500
-
-    res = MyResponse(200, "Success")
-    return jsonify(res.json())
+        if ai_feedback is None:
+            return jsonify(ResponseModel(message="Failed to generate AI feedback").model_dump()), 500
+        
+        return jsonify(ResponseModel(message="Success", data=ai_feedback).model_dump())
+    except Exception as e:
+        return jsonify(ResponseModel(message=f"Internal server error: {e}").model_dump()), 500
 
 if __name__ == "__main__":
     app.run(port=PORT, debug=True, host='0.0.0.0')
-    info(f"Server running on port {PORT}")
+    print(f"Server running on port {PORT}")

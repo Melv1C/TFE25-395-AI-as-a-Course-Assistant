@@ -17,24 +17,20 @@ def get_response_by_ai(data: DataModel) -> str:
         str: The AI-generated response.
     """
 
-    print(f"Data ID: {data.id}")
-    if data.id is None:
-        raise ValueError("Data ID is required to get feedback by ID.")
-
     prompt = generate_prompt(data)
 
-    if not add_discussion_item(data.id, {"role": RoleEnum.system, "message": system_prompt()}):
+    if not add_discussion_item(data.id, {"role": RoleEnum.system, "message": system_prompt}):
         raise ValueError("Failed to add system prompt to the discussion.")
     
     if not add_discussion_item(data.id, {"role": RoleEnum.student, "message": prompt}):
         raise ValueError("Failed to add student prompt to the discussion.")
 
-    if data.ai == AIEnum.gemini:
-        chatbot_response = get_response(prompt, system_prompt())
-    elif data.ai == AIEnum.openai:
-        chatbot_response = get_response(prompt, system_prompt())
+    if data.model_ai == AIEnum.gemini:
+        chatbot_response = get_response(prompt, system_prompt)
+    elif data.model_ai == AIEnum.openai:
+        chatbot_response = get_response(prompt, system_prompt)
     else:
-        raise ValueError(f"Invalid AI type: {data.ai}")
+        raise ValueError(f"Invalid AI type: {data.model_ai}")
     
     if not add_discussion_item(data.id, {"role": RoleEnum.ai, "message": chatbot_response}):
         raise ValueError("Failed to add AI response to the discussion.")

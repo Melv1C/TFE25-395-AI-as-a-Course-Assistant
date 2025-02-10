@@ -3,6 +3,11 @@ from enum import Enum
 from typing import Any, Dict, List, Optional
 from pydantic import BaseModel
 
+class ResponseModel(BaseModel):
+    """Represents the response model for the API."""
+    message: str
+    data: Optional[Any] = None
+
 class AIEnum(str, Enum):
     """AI types enumeration."""
     gemini = "gemini"
@@ -10,7 +15,7 @@ class AIEnum(str, Enum):
 
 class RequestModel(BaseModel):
     """Represents the request model for the API."""
-    ai: AIEnum
+    model_ai: AIEnum
     question: str
     student_input: str
     custom_prompt: Optional[str] = None
@@ -28,12 +33,10 @@ class DiscussionItem(BaseModel):
     message: str
     timestamp: datetime
 
-
 class DataModel(RequestModel):
     """Represents the main data model stored in the database."""
-    id: Optional[str] = None
+    id: str
     discussion: List[DiscussionItem] = []
-    is_useful: Optional[bool] = None
 
     @classmethod
     def from_mongo(cls, data: Dict[str, Any]) -> 'DataModel':
@@ -42,4 +45,7 @@ class DataModel(RequestModel):
         del data['_id']
         return cls(**data)
 
+class DataWithouIDModel(RequestModel):
+    """Represents the main data model stored in the database without ID."""
+    discussion: List[DiscussionItem] = []
     
