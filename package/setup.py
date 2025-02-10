@@ -5,7 +5,7 @@ with open('README.md') as f:
 
 setup(
     name='ai_course_assistant',
-    version='1.5.0',
+    version='2.0.0',
     description='A course assistant that provides feedback on student answers using a chatbot.',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -14,7 +14,8 @@ setup(
     package_dir={'': 'app'},
     packages=find_packages(where='app'),
     install_requires=[
-        'requests'
+        'requests',
+        'pydantic>=2.9.2'
     ],
     extras_require={
         'dev': [
@@ -22,7 +23,7 @@ setup(
             'twine'
         ]
     },
-    python_requires='>=3.6',
+    python_requires='>=3.8',
     license='MIT',
 
 )

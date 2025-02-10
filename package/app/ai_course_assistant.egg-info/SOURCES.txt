@@ -1,9 +1,10 @@
 README.md
 setup.py
 app/ai_course_assistant/__init__.py
-app/ai_course_assistant/myClass.py
-app/ai_course_assistant/myResponse.py
-app/ai_course_assistant/utils.py
+app/ai_course_assistant/ai_course_assistant.py
+app/ai_course_assistant/ai_ingi_assistant.py
+app/ai_course_assistant/global_types.py
+app/ai_course_assistant/html_utils.py
 app/ai_course_assistant.egg-info/PKG-INFO
 app/ai_course_assistant.egg-info/SOURCES.txt
 app/ai_course_assistant.egg-info/dependency_links.txt
