@@ -1,36 +1,38 @@
-import yaml
-from ai_course_assistant import AICourseAssistant, AsyncFeedbackBlock
+from ai_course_assistant import AIIngiAssistant, BaseDataModel, BaseSubmission
 from inginious_container_api import feedback, input, run_student, rst
 
 # URL of the AI assistant service
 URL = "https://tfe-claes.info.ucl.ac.be"
 
-# Load the task details from the YAML file
-with open("task.yaml", "r") as f:
-    task = yaml.safe_load(f)
-
 def request_ai_feedback():
     """
     Request AI feedback if unit tests fail.
     """
-    question = task["context"]
-    input_student = input.get_input("code")
+    question = AIIngiAssistant.get_context()
+    student_input = input.get_input("code")
 
     # Initialize the AI assistant with the task context and student input
-    AICourseAssistant.init(URL)
-    assistant = AICourseAssistant(question, input_student)
+    AIIngiAssistant.server(URL)
+    assistant = AIIngiAssistant(BaseDataModel(
+        ai_model="openai",
+        question=question,
+    ))
+
+    assistant.set_submission(BaseSubmission(
+        student_input=student_input
+    ))
     
     # Get AI feedback asynchronously
-    res = assistant.getFeedbackAsync()
-    
-    if res.success:
-        # If feedback is successful, set the AI feedback in the system
+    try:
+        res = assistant.send()
+        print(res)
+        assistant._set_data_id(res.data_id)
         feedback.set_global_feedback("\n\n", True)
-        feedback.set_global_feedback(AsyncFeedbackBlock(URL, res.id), True)
-    else:
-        # If there's an error with the feedback request, log the error
-        print("Error:", res.message)
-        feedback.set_global_feedback("\n\n Une erreur s'est produite lors de la demande de feedback AI.", True)
+        feedback.set_global_feedback(assistant.rst_feedback(res), True)
+    except Exception as e:
+        feedback.set_global_feedback("Une erreur s'est produite lors de la demande de feedback à l'assistant AI.", True)
+        feedback.set_global_feedback(rst.get_codeblock('bash',str(e)), True)
+
 
 def compute_code():
     """

@@ -12,6 +12,11 @@ class AIIngiAssistant(AICourseAssistant):
         return task["context"]
     
     @staticmethod
-    def rst_feedback(res: ResponseDataModel):
-        return feedback_block(res.submission_id, AIIngiAssistant.feedback_url(res))
+    def get_problem_header(problem_id: str):
+        with open("task.yaml", "r") as f:
+            task = yaml.safe_load(f)
+        return task["problems"][problem_id]["header"]
+    
+    def rst_feedback(self, res: ResponseDataModel):
+        return feedback_block(res.submission_id, self.feedback_url(res))
 

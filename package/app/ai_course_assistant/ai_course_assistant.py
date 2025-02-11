@@ -45,7 +45,7 @@ class AICourseAssistant:
         headers = {'Authorization': f'Bearer {self.access_token}'} if self.access_token else {}
         response = requests.post(
             f'{self.url}/', 
-            json={'data': self.data.model_dump(), 'submission': self.submission.model_dump()}, 
+            json={'data': self.data.model_dump(exclude_none=True), 'submission': self.submission.model_dump(exclude_none=True)}, 
             headers=headers,
             timeout=timeout
         )
@@ -56,7 +56,7 @@ class AICourseAssistant:
         headers = {'Authorization': f'Bearer {self.access_token}'} if self.access_token else {}
         response = requests.post(
             f'{self.url}/{self.data_id}/submissions', 
-            json=self.submission.model_dump(), 
+            json=self.submission.model_dump(exclude_none=True), 
             headers=headers,
             timeout=timeout
         )
@@ -85,5 +85,6 @@ class AICourseAssistant:
             
     def feedback_url(self, res: ResponseDataModel):
         """Returns the feedback URL."""
-        return f'{self.url}/{self.data_id}/submissions/{res.submission_id}'
+        data_id = self.data_id if hasattr(self, 'data_id') else res.data_id
+        return f'{self.url}/{data_id}/submissions/{res.submission_id}'
 
