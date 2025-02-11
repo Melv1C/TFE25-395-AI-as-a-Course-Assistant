@@ -4,11 +4,11 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from pydantic import ValidationError
 
-from global_types import RequestModel, RoleEnum, ResponseModel
+from global_types import ResponseModel, BaseDataModel, BaseSubmission
 from database import (
-    save_data, get_data_by_id
+    save_data, get_data_by_id, add_submission
 )
-from ai_handler import get_response_by_ai
+from ai_manager import AIManager
 
 from pymongo.errors import PyMongoError
 
@@ -27,15 +27,49 @@ def check_access_token(request_headers):
 app = Flask(__name__)
 CORS(app)
 
+ai_manager = AIManager()
+
 @app.route('/', methods=['GET'])
 def home():
     """Returns a welcome message."""
     return jsonify(ResponseModel(message="Welcome to the AI Course Assistant API").model_dump())
 
+@app.route('/available_ais', methods=['GET'])
+def available_ais():
+    """Returns a list of available AI models."""
+    return jsonify(ResponseModel(message="Success", data=ai_manager.get_available_ais()).model_dump())
 
-@app.route('/feedbacks', methods=['POST'])
-def save_feedback_data():
-    """Handles feedback request."""
+@app.route('/', methods=['POST'])
+def save_data_route():
+    """Handles data request."""
+    if not request.is_json:
+        return jsonify(ResponseModel(message="Request must have a JSON body").model_dump()), 400
+
+    if not check_access_token(request.headers):
+        return jsonify(ResponseModel(message="Unauthorized").model_dump()), 401
+
+    if not request.json.get('data') or not request.json.get('submission'):
+        return jsonify(ResponseModel(message="Request must have 'data' and 'submission' keys").model_dump()), 400
+    try:
+        data = BaseDataModel(**request.json.get('data'))
+        
+        available_ais = ai_manager.get_available_ais()
+        if data.ai_model not in available_ais:
+            return jsonify(ResponseModel(message=f"Model {data.ai_model} is not available").model_dump()), 400
+
+        data_id = save_data(data)
+        submission_id = add_submission(data_id, BaseSubmission(**request.json.get('submission')))
+        return jsonify(ResponseModel(message="Data saved", data={"data_id": data_id, "submission_id": submission_id}).model_dump()), 201
+    except ValidationError as e:
+        return jsonify(ResponseModel(message=f"Invalid request: {e}").model_dump()), 400
+    except PyMongoError as e:
+        return jsonify(ResponseModel(message=f"Failed to save data: {e}").model_dump()), 500
+    except Exception as e:
+        return jsonify(ResponseModel(message=f"Internal server error: {e}").model_dump()), 500
+    
+@app.route('/<data_id>/submissions', methods=['POST'])
+def add_submission_route(data_id):
+    """Handles submission request."""
     if not request.is_json:
         return jsonify(ResponseModel(message="Request must have a JSON body").model_dump()), 400
 
@@ -43,53 +77,67 @@ def save_feedback_data():
         return jsonify(ResponseModel(message="Unauthorized").model_dump()), 401
 
     try:
-        data = RequestModel(**request.json)
-        data_id = save_data(data)
-        return jsonify(ResponseModel(message="Feedback data saved", data=data_id).model_dump()), 201
+        submission_id = add_submission(data_id, BaseSubmission(**request.json))
+        return jsonify(ResponseModel(message="Submission added", data={"submission_id": submission_id}).model_dump()), 201
     except ValidationError as e:
         return jsonify(ResponseModel(message=f"Invalid request: {e}").model_dump()), 400
     except PyMongoError as e:
-        return jsonify(ResponseModel(message=f"Failed to save data: {e}").model_dump()), 500
+        return jsonify(ResponseModel(message=f"Failed to add submission: {e}").model_dump()), 500
     except Exception as e:
         return jsonify(ResponseModel(message=f"Internal server error: {e}").model_dump()), 500
-
-@app.route('/feedbacks/<feedback_id>', methods=['GET'])
-def get_feedback(feedback_id):
-    """Retrieves AI-generated feedback by ID."""
+    
+@app.route('/<data_id>/submissions/<submission_id>', methods=['GET'])
+def get_submission(data_id, submission_id):
+    """Retrieves a submission by ID."""
     try:
-        data = get_data_by_id(feedback_id)
+        data = get_data_by_id(data_id)
         if data is None:
             return jsonify(ResponseModel(message="Data not found").model_dump()), 404
 
-        # Check if an 'ai' role response already exists in the discussion
-        ai_feedback = next(
-            (item.message for item in data.discussion if item.role == RoleEnum.ai),
+        submission = next(
+            (item for item in data.submissions if str(item.id) == submission_id),
             None
         )
 
-        if ai_feedback is None:
-            return jsonify(ResponseModel(message="AI feedback not found").model_dump()), 404
+        if submission is None:
+            return jsonify(ResponseModel(message="Submission not found").model_dump()), 404
         
-        return jsonify(ResponseModel(message="Success", data=ai_feedback).model_dump())
+        return jsonify(ResponseModel(message="Success", data={
+            "submission": submission.model_dump(),
+            "current_nb_of_feedbacks": len([sub for sub in data.submissions if sub.feedback is not None]),
+            "max_nb_of_feedbacks": data.max_nb_of_feedbacks
+        }).model_dump())
     except Exception as e:
         return jsonify(ResponseModel(message=f"Internal server error: {e}").model_dump()), 500
-
-@app.route('/feedbacks/<feedback_id>/generate', methods=['POST'])
-def generate_feedback(feedback_id):
-    """Generates AI feedback for a given feedback ID."""
+    
+@app.route('/<data_id>/submissions/<submission_id>/get_feedback', methods=['GET'])
+def get_feedback(data_id, submission_id):
+    """Retrieves feedback for a submission by ID."""
     try:
-        data = get_data_by_id(feedback_id)
+        data = get_data_by_id(data_id)
         if data is None:
             return jsonify(ResponseModel(message="Data not found").model_dump()), 404
 
-        ai_feedback = get_response_by_ai(data)
+        submission = next(
+            (item for item in data.submissions if str(item.id) == submission_id),
+            None
+        )
 
-        if ai_feedback is None:
-            return jsonify(ResponseModel(message="Failed to generate AI feedback").model_dump()), 500
+        if submission is None:
+            return jsonify(ResponseModel(message="Submission not found").model_dump()), 404
+
+        if submission.feedback is not None:
+            return jsonify(ResponseModel(message="Feedback already exists", data=submission.feedback).model_dump()), 200
         
-        return jsonify(ResponseModel(message="Success", data=ai_feedback).model_dump())
+        if len([sub for sub in data.submissions if sub.feedback is not None]) >= data.max_nb_of_feedbacks:
+            return jsonify(ResponseModel(message="Maximum number of feedbacks reached").model_dump()), 400
+
+        ai_response = ai_manager.get_ai_response(data, submission)
+
+        return jsonify(ResponseModel(message="Success", data=ai_response).model_dump())
     except Exception as e:
         return jsonify(ResponseModel(message=f"Internal server error: {e}").model_dump()), 500
+    
 
 if __name__ == "__main__":
     app.run(port=PORT, debug=True, host='0.0.0.0')
