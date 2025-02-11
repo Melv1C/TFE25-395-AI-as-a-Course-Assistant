@@ -1,21 +1,26 @@
-from enum import Enum
 from typing import Any, Dict, Optional
 from pydantic import BaseModel
 
-class AIEnum(str, Enum):
-    """AI types enumeration."""
-    gemini = "gemini"
-    openai = "openai"
-
-class RequestModel(BaseModel):
-    """Represents the request model for the API."""
-    question: str
-    student_input: str
-    custom_prompt: Optional[str] = None
-    metadata: Optional[Dict[str, Any]] = None
+class ResponseDataModel(BaseModel):
+    """Represents the response data model for the API."""
+    data_id: Optional[str] = None
+    submission_id: str
 
 class ResponseModel(BaseModel):
     """Represents the response model for the API."""
-    success: bool
     message: str
-    id: Optional[str] = None
+    data: Optional[ResponseDataModel] = None
+
+class BaseSubmission(BaseModel):
+    """Represents the base submission in the database."""
+    student_input: str
+    metadata: Dict[str, Any] = {}
+
+class BaseDataModel(BaseModel):
+    """Represents the base data model for the API."""
+    ai_model: str
+    question: str
+    system_prompt: Optional[str] = None
+    prompt: Optional[str] = None
+    max_nb_of_feedbacks: Optional[int] = None
+    metadata: Dict[str, Any] = {}

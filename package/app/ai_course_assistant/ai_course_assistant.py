@@ -1,59 +1,89 @@
 import requests
-from .global_types import AIEnum, RequestModel, ResponseModel
+from .global_types import BaseDataModel, BaseSubmission, ResponseDataModel, ResponseModel
 
 class AICourseAssistant:
-    server_url: str = None
-    access_token: str = None
-    ai_model: AIEnum = AIEnum.openai
+    @classmethod
+    def server(cls, url: str, access_token: str = None):
+        """Initializes the server."""
+        cls.url = url
+        cls.access_token = access_token
 
     @classmethod
-    def init(cls, url: str, token: str = None):
-        cls.server_url = url
-        cls.access_token = token
-
-    @classmethod
-    def use(cls, ai: AIEnum):
-        cls.ai_model = ai
-
-    @classmethod
-    def _check_initialized(cls):
-        if not cls.server_url:
-            raise ValueError("Server URL must be set before using the assistant.")
+    def _check_server(cls):
+        """Checks if the server is initialized."""
+        if not hasattr(cls, 'url'):
+            raise ValueError("The server has not been initialized.")
         
-    def __init__(self, question: str, student_input: str):
-        AICourseAssistant._check_initialized()
-        self.request: RequestModel = RequestModel(question=question, student_input=student_input)
+    @classmethod
+    def from_data_id(cls, data_id: int):
+        """Initializes the AI course assistant from the data ID."""
+        cls._check_server()
+        assistant = cls()
+        assistant._set_data_id(data_id)
+        return assistant
 
-    def add(self, key, value):
-        setattr(self.request.metadata, key, value)
+    def __init__(self, data: BaseDataModel = None):
+        """Initializes the AI course assistant."""
+        self._check_server()
+        if data is not None:
+            self.data = BaseDataModel(**data.model_dump())
 
-    def set_prompt(self, prompt: str):
-        self.request.custom_prompt = prompt
+    def _set_data_id(self, data_id: int):
+        """Sets the data ID."""
+        self.data_id = data_id
 
-    def get_feedback(self, timeout: int = 5):
-        AICourseAssistant._check_initialized()
-        headers = {
-            'Authorization': f'Bearer {AICourseAssistant.access_token}'
-        }
+    def set_submission(self, submission: BaseSubmission):
+        """Sets the submission."""
+        self.submission = BaseSubmission(**submission.model_dump())
 
+    def _send_data(self, timeout: int):
+        """Sends the data to the server."""
+
+        if not hasattr(self, 'data'):
+            raise ValueError("The data has not been set.")
+
+        headers = {'Authorization': f'Bearer {self.access_token}'} if self.access_token else {}
+        response = requests.post(
+            f'{self.url}/', 
+            json={'data': self.data.model_dump(), 'submission': self.submission.model_dump()}, 
+            headers=headers,
+            timeout=timeout
+        )
+        return ResponseModel(**response.json())
+
+    def _send_submission(self, timeout: int):
+        """Sends the submission to the server."""
+        headers = {'Authorization': f'Bearer {self.access_token}'} if self.access_token else {}
+        response = requests.post(
+            f'{self.url}/{self.data_id}/submissions', 
+            json=self.submission.model_dump(), 
+            headers=headers,
+            timeout=timeout
+        )
+        return ResponseModel(**response.json())
+        
+    def send(self, timeout: int = 5) -> ResponseDataModel:
+        """Sends the data and submission to the server."""
+        self._check_server()
+        if not hasattr(self, 'submission'):
+            raise ValueError("The submission has not been set.")
+        
         try:
-            response = requests.post(
-                f"{AICourseAssistant.server_url}/get_feedback", 
-                json={**self.request.model_dump(), "ai_model": AICourseAssistant.ai_model}, 
-                headers=headers, 
-                timeout=timeout
-            )
-            if response.status_code == 200 or response.status_code == response.json()['code']:
-                return ResponseModel(success=True, message=response.json()['message'], id=response.json()['data'])
+            if hasattr(self, 'data_id'):
+                res = self._send_submission(timeout)
             else:
-                return ResponseModel(success=False, message=f"{response.status_code} - {response.reason}")
+                res = self._send_data(timeout)
+
+            if res.data is None:
+                raise ValueError(f"Data not found in response: {res.message}")
+            
+            return ResponseDataModel(**res.data.model_dump())
         except requests.exceptions.Timeout:
-            return ResponseModel(success=False, message="Request timed out.")
-        except Exception as e:
-            return ResponseModel(success=False, message=str(e))
-        
-    @staticmethod
-    def feedback_url(id: str):
-        if AICourseAssistant.server_url is None:
-            raise ValueError("Server URL must be set before using the assistant.")
-        return f"{AICourseAssistant.server_url}/feedback/{id}"
+            raise TimeoutError("The request timed out.")
+        except requests.exceptions.RequestException as e:
+            raise ValueError(f"Failed to send data: {e}")
+            
+    def feedback_url(self, res: ResponseDataModel):
+        """Returns the feedback URL."""
+        return f'{self.url}/{self.data_id}/submissions/{res.submission_id}'
+

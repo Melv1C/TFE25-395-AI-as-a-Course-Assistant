@@ -1,89 +1,68 @@
 def feedback_block(id: str, url: str) -> str:
     return f'''
 .. raw:: html
-    <div style="font-family: Arial, sans-serif; max-width: 500px; margin-top: 20px;">
-        <button id="feedbackButton_{id}" class="feedback-btn" onclick="getFeedback_{id}()">Ask feedback from an AI</button>
+
+    <div style="font-family: Arial, sans-serif; margin-top: 20px;">
+        <button id="feedbackButton_{id}" class="feedback-btn" onclick="getFeedback('{id}')" style="display: none;">
+            Demander un feedback AI
+        </button>
         
         <div id="feedback_{id}" class="feedback-output" style="display: none;">
-            <!-- Feedback content including header and message -->
-            <div class="feedback-header">
-                AI Course Assistant
-            </div>
-            
+            <div class="feedback-header">AI Course Assistant</div>
             <div id="feedbackContent_{id}" class="feedback-text"></div>
         </div>
     </div>
 
     <script>
-        function getFeedback() {{
-            const feedbackButton = document.getElementById('feedbackButton_{id}');
-            const feedback = document.getElementById('feedback_{id}');
-            const feedbackContent = document.getElementById('feedbackContent_{id}');
-            
-            // Hide button and show loading spinner
-            feedbackButton.style.display = 'none';
-            feedback.style.display = 'block'; // Show feedback block
-            feedbackContent.innerHTML = '<div class="loading-circle"></div>';
-            feedbackContent.style.display = 'block';
+        function markdownToHTML(markdown) {{
+            return markdown
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+                .replace(/\*(.*?)\*/g, "<em>$1</em>")
+                .replace(/```([\s\S]*?)```/g, "<pre><code>$1</code></pre>")
+                .replace(/`(.*?)`/g, "<code>$1</code>")
+                .replace(/^- (.*)$/gm, "<li>$1</li>")
+                .replace(/(<li>.*<\/li>(?:\n<li>.*<\/li>)*)/g, "<ul>$1</ul>")
+                .replace(/\n(?!<\/?(ul|ol|li)>)/g, "<br>");
+        }}
 
+        function getData(submissionId) {{
             fetch('{url}')
+                .then(response => response.ok ? response.json() : Promise.reject('Not found'))
+                .then(data => {{
+                    if (data.data.submission.feedback) {{
+                        document.getElementById(`feedbackButton_${{submissionId}}`).style.display = 'none';
+                        document.getElementById(`feedback_${{submissionId}}`).style.display = 'block';
+                        document.getElementById(`feedbackContent_${{submissionId}}`).innerHTML = markdownToHTML(data.submission.feedback);
+                        return;
+                    }}
+                    document.getElementById(`feedbackButton_${{submissionId}}`).style.display = 'block';
+                }})
+                .catch(() => {{
+                    document.getElementById(`feedbackButton_${{submissionId}}`).style.display = 'block';
+                }});
+        }}
+
+        function getFeedback(submissionId) {{
+            const feedbackButton = document.getElementById(`feedbackButton_${{submissionId}}`);
+            const feedback = document.getElementById(`feedback_${{submissionId}}`);
+            const feedbackContent = document.getElementById(`feedbackContent_${{submissionId}}`);
+
+            feedbackButton.style.display = 'none';
+            feedback.style.display = 'block';
+            feedbackContent.innerHTML = '<div class="loading-circle"></div>';
+
+            fetch('{url}/get_feedback')
                 .then(response => response.json())
                 .then(data => {{
-                    feedbackContent.innerHTML = data.data; // Show feedback message
+                    feedbackContent.innerHTML = markdownToHTML(data.data);
                 }})
-                .catch(error => {{
-                    console.error('Error:', error);
+                .catch(() => {{
                     feedbackContent.innerHTML = '<div class="feedback-error">Failed to load feedback.</div>';
                 }});
         }}
 
-        // CSS styles for components
-        const style = document.createElement('style');
-        style.innerHTML = `
-            .feedback-btn {{
-                padding: 8px 12px;
-                border-radius: 5px;
-                border: none;
-                background: linear-gradient(90deg, rgb(76, 27, 107) 0%, rgb(176, 132, 204) 58%, rgb(86, 221, 249) 100%);
-                color: white;
-                cursor: pointer;
-            }}
-            .loading-circle {{
-                display: inline-block;
-                width: 24px;
-                height: 24px;
-                border: 3px solid #4c1b6b;
-                border-top: 3px solid transparent;
-                border-radius: 50%;
-                animation: spin 1s linear infinite;
-            }}
-            .feedback-output {{
-                font-size: 14px;
-                background-color: #f1f0f0;
-                color: #333;
-                border-radius: 10px;
-                overflow: hidden;
-            }}
-            .feedback-text {{
-                padding: 10px;
-            }}
-            .feedback-header {{
-                display: block;
-                padding: 10px;
-                color: white;
-                font-size: 18px;
-                font-weight: bold;
-                text-align: center;
-                background: linear-gradient(90deg, rgb(76, 27, 107) 0%, rgb(176, 132, 204) 58%, rgb(86, 221, 249) 100%);
-            }}
-            .feedback-error {{
-                color: red;
-            }}
-            @keyframes spin {{
-                0% {{ transform: rotate(0deg); }}
-                100% {{ transform: rotate(360deg); }}
-            }}
-        `;
-        document.head.appendChild(style);
+        getData('{id}');
     </script>
     '''
