@@ -34,8 +34,8 @@ def home():
     """Returns a welcome message."""
     return jsonify(ResponseModel(message="Welcome to the AI Course Assistant API").model_dump())
 
-@app.route('/available_ais', methods=['GET'])
-def available_ais():
+@app.route('/ais', methods=['GET'])
+def ais():
     """Returns a list of available AI models."""
     return jsonify(ResponseModel(message="Success", data=ai_manager.get_available_ais()).model_dump())
 
@@ -78,7 +78,7 @@ def add_submission_route(data_id):
 
     try:
         submission_id = add_submission(data_id, BaseSubmission(**request.json))
-        return jsonify(ResponseModel(message="Submission added", data={"submission_id": submission_id}).model_dump()), 201
+        return jsonify(ResponseModel(message="Submission added", data={"data_id": data_id, "submission_id": submission_id}).model_dump()),
     except ValidationError as e:
         return jsonify(ResponseModel(message=f"Invalid request: {e}").model_dump()), 400
     except PyMongoError as e:
@@ -110,7 +110,7 @@ def get_submission(data_id, submission_id):
     except Exception as e:
         return jsonify(ResponseModel(message=f"Internal server error: {e}").model_dump()), 500
     
-@app.route('/<data_id>/submissions/<submission_id>/get_feedback', methods=['GET'])
+@app.route('/<data_id>/submissions/<submission_id>/feedback', methods=['GET'])
 def get_feedback(data_id, submission_id):
     """Retrieves feedback for a submission by ID."""
     try:
