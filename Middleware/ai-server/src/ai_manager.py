@@ -1,6 +1,9 @@
 from ai_models.base import AbstractAIModel
 from ai_models.openai import OpenAIModel
 from ai_models.gemini import GeminiAIModel
+from ai_models.deepseek import DeepseekAIModel
+from ai_models.anthropic import AnthropicAIModel
+from ai_models.mistral import MistralAIModel
 
 from global_types import DataModel, Submission, Feedback
 from prompts import generate_prompt
@@ -13,6 +16,9 @@ class AIManager:
     AI_CLASSES: dict[str, tuple[type[AbstractAIModel], dict]] = {
         "openai": (OpenAIModel, {}),
         "gemini": (GeminiAIModel, {}),
+        "deepseek": (DeepseekAIModel, {}),
+        "claude": (AnthropicAIModel, {}),
+        "mistral": (MistralAIModel, {}),
     }
 
     def __init__(self):
