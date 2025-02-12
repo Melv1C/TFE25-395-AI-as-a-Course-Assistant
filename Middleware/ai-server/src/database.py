@@ -33,7 +33,7 @@ def get_data_by_id(data_id: str) -> DataModel:
     """Retrieves data from the database by ID."""
     data = collection.find_one({"id": data_id})
     if data is None:
-        raise ValueError(f"Data with ID {data_id} not found.")
+        raise Exception(f"Data with ID {data_id} not found.")
     return DataModel(**data)
 
 def add_submission(data_id: str, submission: BaseSubmission) -> str:

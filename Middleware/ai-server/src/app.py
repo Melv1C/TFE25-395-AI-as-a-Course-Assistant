@@ -78,7 +78,7 @@ def add_submission_route(data_id):
 
     try:
         submission_id = add_submission(data_id, BaseSubmission(**request.json))
-        return jsonify(ResponseModel(message="Submission added", data={"data_id": data_id, "submission_id": submission_id}).model_dump()),
+        return jsonify(ResponseModel(message="Submission added", data={"data_id": data_id, "submission_id": submission_id}).model_dump()), 201
     except ValidationError as e:
         return jsonify(ResponseModel(message=f"Invalid request: {e}").model_dump()), 400
     except PyMongoError as e:

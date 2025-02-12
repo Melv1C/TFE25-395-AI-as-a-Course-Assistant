@@ -10,7 +10,7 @@ class AbstractAIModel(ABC):
         """Initialize the AI backend with the API key."""
         api_key = os.getenv(self.API_KEY_ENV)
         if not api_key:
-            raise ValueError(f"Missing API key for {self.__class__.__name__}")
+            raise Exception(f"Missing API key for {self.__class__.__name__}")
         self.api_key = api_key  # Store API key for requests
 
     @abstractmethod

@@ -47,7 +47,7 @@ class AIManager:
 
         ai_instance = self.get_ai_instance(data.ai_model)
         if not ai_instance:
-            raise ValueError(f"Invalid AI type: {data.ai_model}")
+            raise Exception(f"Invalid AI type: {data.ai_model}")
 
         system_prompt = generate_prompt(data.system_prompt, {
             "question": data.question,
