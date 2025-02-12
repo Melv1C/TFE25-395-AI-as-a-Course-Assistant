@@ -6,5 +6,5 @@ LABEL   org.inginious.grading.name="ai_course_assistant"
 
 # install the needed packages
 RUN     pip3.8 install pydantic>=2.9.2
-RUN     pip3.8 install -i https://test.pypi.org/simple/ ai-course-assistant==2.0.1
+RUN     pip3.8 install -i https://test.pypi.org/simple/ ai-course-assistant==2.1.3
 

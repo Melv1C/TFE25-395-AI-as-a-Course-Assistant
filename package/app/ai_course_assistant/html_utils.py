@@ -55,15 +55,16 @@ def feedback_block(id: str, url: str) -> str:
                     }}
 
                     // Show feedback count with a progress bar
-                    const currentFeedbacks = data.data.current_nb_of_feedbacks || 0;
-                    const maxFeedbacks = data.data.max_nb_of_feedbacks
-                    
-                    if (maxFeedbacks !== undefined) {{
-                        feedbackCounter.innerHTML = `Feedbacks générés : <strong>${{currentFeedbacks}} / ${{maxFeedbacks}}</strong>`;
-                        progressBar.style.width = `${{currentFeedbacks / maxFeedbacks * 100}}%`;
-                    }} else {{
-                        feedbackCounter.style.display = 'none';
-                        progressBar.style.display = 'none';
+                    const currentFeedbacks = data.data.current_nb_of_feedbacks;
+                    const maxFeedbacks = data.data.max_nb_of_feedbacks;
+
+                    feedbackCounter.innerHTML = `Feedbacks générés : <strong>${{currentFeedbacks}} / ${{maxFeedbacks}}</strong>`;
+                    progressBar.style.width = `${{(currentFeedbacks / maxFeedbacks) * 100}}%`;
+
+                    if (currentFeedbacks >= maxFeedbacks && feedbackButton.style.display !== 'none') {{
+                        feedbackButton.style.display = 'none';
+                        feedbackContent.style.display = 'block';
+                        feedbackContent.innerHTML = '<div class="feedback-error">Vous avez atteint le nombre maximum de feedbacks générés.</div>';
                     }}
                     
                 }})
@@ -102,6 +103,8 @@ def feedback_block(id: str, url: str) -> str:
             color: #333;
             border-radius: 10px;
             overflow: hidden;
+            width: fit-content;
+            max-width: 100%;
         }}
         
         .feedback-header {{

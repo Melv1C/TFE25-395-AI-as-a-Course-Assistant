@@ -12,10 +12,10 @@ class AICourseAssistant:
     def _check_server(cls):
         """Checks if the server is initialized."""
         if not hasattr(cls, 'url'):
-            raise ValueError("The server has not been initialized.")
+            raise Exception("The server has not been initialized.")
         
     @classmethod
-    def from_data_id(cls, data_id: int) -> 'AICourseAssistant':
+    def from_data_id(cls, data_id: str) -> 'AICourseAssistant':
         """Initializes the AI course assistant from the data ID."""
         cls._check_server()
         assistant = cls()
@@ -28,7 +28,7 @@ class AICourseAssistant:
         if data is not None:
             self.data = BaseDataModel(**data.model_dump())
 
-    def _set_data_id(self, data_id: int):
+    def _set_data_id(self, data_id: str):
         """Sets the data ID."""
         self.data_id = data_id
 
@@ -40,7 +40,7 @@ class AICourseAssistant:
         """Sends the data to the server."""
 
         if not hasattr(self, 'data'):
-            raise ValueError("The data has not been set.")
+            raise Exception("The data has not been set.")
 
         headers = {'Authorization': f'Bearer {self.access_token}'} if self.access_token else {}
         response = requests.post(
@@ -66,7 +66,7 @@ class AICourseAssistant:
         """Sends the data and submission to the server."""
         self._check_server()
         if not hasattr(self, 'submission'):
-            raise ValueError("The submission has not been set.")
+            raise Exception("The submission has not been set.")
         
         try:
             if hasattr(self, 'data_id'):
@@ -75,18 +75,18 @@ class AICourseAssistant:
                 res = self._send_data(timeout)
 
             if res.data is None:
-                raise ValueError(f"Data not found in response: {res.message}")
+                raise Exception(f"Data not found in response: {res.message}")
             
             self.res = ResponseDataModel(**res.data.model_dump())
             return self.res
         except requests.exceptions.Timeout:
-            raise TimeoutError("The request timed out.")
+            raise Exception("The request timed out.")
         except requests.exceptions.RequestException as e:
-            raise ValueError(f"Failed to send data: {e}")
+            raise Exception(f"An error occurred while sending the request: {e}")
             
     def feedback_url(self):
         """Returns the feedback URL."""
         if not hasattr(self, 'res'):
-            raise ValueError("The response has not been set.")
+            raise Exception("The response has not been set.")
         return f'{self.url}/{self.res.data_id}/submissions/{self.res.submission_id}'
 
