@@ -3,7 +3,7 @@ from pydantic import BaseModel
 
 class ResponseDataModel(BaseModel):
     """Represents the response data model for the API."""
-    data_id: Optional[str] = None
+    data_id: str
     submission_id: str
 
 class ResponseModel(BaseModel):

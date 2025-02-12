@@ -5,7 +5,7 @@ with open('README.md') as f:
 
 setup(
     name='ai_course_assistant',
-    version='2.0.6',
+    version='2.0.7',
     description='A course assistant that provides feedback on student answers using a chatbot.',
     long_description=long_description,
     long_description_content_type='text/markdown',

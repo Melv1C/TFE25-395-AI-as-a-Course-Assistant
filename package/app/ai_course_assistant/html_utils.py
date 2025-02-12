@@ -5,7 +5,7 @@ def feedback_block(id: str, url: str) -> str:
     <div class="feedback">
         <div class="feedback-header">AI Course Assistant</div>
         <div class="feedback-content">
-            <button id="feedbackButton_{id}f" class="feedback-btn" onclick="getFeedback('{id}')" style="display: none;">
+            <button id="feedbackButton_{id}" class="feedback-btn" onclick="getFeedback('{id}')" style="display: none;">
                 Demander un feedback IA
             </button>
 
@@ -82,7 +82,7 @@ def feedback_block(id: str, url: str) -> str:
             feedbackContent.style.display = 'block';
             feedbackContent.innerHTML = '<div class="loading-circle"></div>';
 
-            fetch('{url}/get_feedback')
+            fetch('{url}/feedback')
                 .then(response => response.json())
                 .then(data => {{
                     getData(submissionId);

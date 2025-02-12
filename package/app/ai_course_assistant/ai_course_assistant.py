@@ -15,7 +15,7 @@ class AICourseAssistant:
             raise ValueError("The server has not been initialized.")
         
     @classmethod
-    def from_data_id(cls, data_id: int):
+    def from_data_id(cls, data_id: int) -> 'AICourseAssistant':
         """Initializes the AI course assistant from the data ID."""
         cls._check_server()
         assistant = cls()
@@ -77,14 +77,16 @@ class AICourseAssistant:
             if res.data is None:
                 raise ValueError(f"Data not found in response: {res.message}")
             
-            return ResponseDataModel(**res.data.model_dump())
+            self.res = ResponseDataModel(**res.data.model_dump())
+            return self.res
         except requests.exceptions.Timeout:
             raise TimeoutError("The request timed out.")
         except requests.exceptions.RequestException as e:
             raise ValueError(f"Failed to send data: {e}")
             
-    def feedback_url(self, res: ResponseDataModel):
+    def feedback_url(self):
         """Returns the feedback URL."""
-        data_id = self.data_id if hasattr(self, 'data_id') else res.data_id
-        return f'{self.url}/{data_id}/submissions/{res.submission_id}'
+        if not hasattr(self, 'res'):
+            raise ValueError("The response has not been set.")
+        return f'{self.url}/{self.res.data_id}/submissions/{self.res.submission_id}'
 
