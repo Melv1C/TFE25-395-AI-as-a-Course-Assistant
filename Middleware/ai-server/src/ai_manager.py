@@ -15,17 +15,17 @@ class AIManager:
     """Manages available AI backends."""
 
     AI_CLASSES: dict[str, tuple[type[AbstractAIModel], dict]] = {
-        "openai": (OpenAIModel, {}),
-        "gemini": (GeminiAIModel, {}),
+        "gpt-4o-mini": (OpenAIModel, {}),
+        "gemini-2.0-flash": (GeminiAIModel, {}),
         # "deepseek": (DeepseekAIModel, {}),
         # "claude": (AnthropicAIModel, {}),
-        "mistral": (MistralAIModel, {}),
+        "mistral-small-latest": (MistralAIModel, {}),
         "llama3.2": (OllamaAIModel, {"model": "llama3.2"}),
         "llama3.2:1b": (OllamaAIModel, {"model": "llama3.2:1b"}),
-        "deepseek-r1": (OllamaAIModel, {"model": "deepseek-r1"}),
-        "deepseek-r1:1.5b": (OllamaAIModel, {"model": "deepseek-r1:1.5b"}),
-        "qwen2.5-coder": (OllamaAIModel, {"model": "qwen2.5-coder"}),
-        "qwen2.5-coder:1.5b": (OllamaAIModel, {"model": "qwen2.5-coder:1.5b"}),
+        "llama3.2:1b": (OllamaAIModel, {"model": "llama3.2:1b"}),
+        "local-mistral": (OllamaAIModel, {"model": "mistral"}),
+        "codellama": (OllamaAIModel, {"model": "codellama"}),
+        "deepseek-coder": (OllamaAIModel, {"model": "deepseek-coder"}),
     }
 
     def __init__(self):
