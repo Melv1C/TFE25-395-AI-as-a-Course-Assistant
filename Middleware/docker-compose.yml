@@ -6,7 +6,6 @@ services:
       - mongo_data:/data/db
     networks:
       - middleware
-
   mongo-express:
     image: mongo-express:latest
     restart: always
@@ -24,6 +23,8 @@ services:
   ollama:
     image: ollama/ollama:latest
     restart: always
+    volumes:
+      - ollama:/root/ollama
     networks:
       - middleware
 
