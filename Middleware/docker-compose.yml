@@ -9,6 +9,11 @@ services:
       - mongo_data:/data/db
     networks:
       - middleware
+    healthcheck:
+      test: echo 'db.stats().ok' | mongo localhost:27017/test --quiet
+      interval: 10s
+      timeout: 3s
+      retries: 5
   mongo-express:
     image: mongo-express:latest
     container_name: mongo-express
@@ -16,7 +21,8 @@ services:
     ports:
       - "8443:8081"
     depends_on:
-      - mongo
+      mongo:
+        condition: service_healthy
     environment:
       ME_CONFIG_MONGODB_SERVER: mongo
       ME_CONFIG_MONGODB_PORT: 27017
@@ -44,7 +50,7 @@ services:
       - mongo
       - ollama
     environment:
-      MONGO_URI: mongodb://mongodb:27017
+      MONGO_URI: mongodb://mongo:27017
       MONGO_COLLECTION: ${MONGO_COLLECTION}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       GEMINI_API_KEY: ${GEMINI_API_KEY}
