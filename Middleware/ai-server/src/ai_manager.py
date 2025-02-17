@@ -26,11 +26,11 @@ class AIManager:
         "llama3.2": (OllamaAIModel, {"model": "llama3.2"}),
         # "llama3.2:1b": (OllamaAIModel, {"model": "llama3.2:1b"}),
         # "local-mistral": (OllamaAIModel, {"model": "mistral"}),
-        # "deepseek-r1": (OllamaAIModelWithoutSystemPrompt, {"model": "deepseek-r1"}), # Pas de system prompt
         # "codellama": (OllamaAIModelWithoutSystemPrompt, {"model": "codellama"}), # Pas de system prompt
         # "qwen2.5-coder:1.5b": (OllamaAIModelWithoutSystemPrompt, {"model": "qwen2.5-coder:1.5b"}), # Pas de system prompt
-        "qwen2.5:3b": (OllamaAIModel, {"model": "qwen2.5:3b"}), # Pas de system prompt
         "phi3": (OllamaAIModel, {"model": "phi3"}),
+        "deepseek-r1:1.5b": (OllamaAIModelWithoutSystemPrompt, {"model": "deepseek-r1:1.5b"}), # Pas de system prompt
+        "qwen2.5:3b": (OllamaAIModelWithoutSystemPrompt, {"model": "qwen2.5:3b"}), # Pas de system prompt
 
     }
 
