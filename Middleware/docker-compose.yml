@@ -6,13 +6,19 @@ services:
       - mongo_data:/data/db
     networks:
       - middleware
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "db.runCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   mongo-express:
     image: mongo-express:latest
     restart: always
     ports:
       - "8443:8081"
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
     environment:
       ME_CONFIG_MONGODB_SERVER: mongodb
       ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_EXPRESS_USERNAME}
