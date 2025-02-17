@@ -11,7 +11,7 @@ class AnthropicAIModel(AbstractAIModel):
     API_KEY_ENV: str = "ANTHROPIC_API_KEY"
 
     def __init__(self, model: str = "claude-3-5-haiku-latest"):
-        super().__init__()
+        super()._check_and_set_api_key()
         self.client = anthropic.Anthropic(api_key=self.api_key)
         self.model = model
 

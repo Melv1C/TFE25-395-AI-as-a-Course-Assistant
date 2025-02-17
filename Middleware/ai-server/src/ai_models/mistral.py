@@ -11,7 +11,7 @@ class MistralAIModel(AbstractAIModel):
     API_KEY_ENV: str = "MISTRAL_API_KEY"
 
     def __init__(self, model: str = "mistral-small-latest"):
-        super().__init__()
+        super()._check_and_set_api_key()
         self.client = Mistral(api_key=self.api_key)
         self.model = model
 

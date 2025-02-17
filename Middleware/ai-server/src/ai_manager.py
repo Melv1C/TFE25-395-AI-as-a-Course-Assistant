@@ -4,6 +4,7 @@ from ai_models.gemini import GeminiAIModel
 from ai_models.deepseek import DeepseekAIModel
 from ai_models.anthropic import AnthropicAIModel
 from ai_models.mistral import MistralAIModel
+from ai_models.ollama import OllamaAIModel
 
 from global_types import DataModel, Submission, Feedback
 from prompts import generate_prompt
@@ -16,9 +17,15 @@ class AIManager:
     AI_CLASSES: dict[str, tuple[type[AbstractAIModel], dict]] = {
         "openai": (OpenAIModel, {}),
         "gemini": (GeminiAIModel, {}),
-        "deepseek": (DeepseekAIModel, {}),
-        "claude": (AnthropicAIModel, {}),
+        # "deepseek": (DeepseekAIModel, {}),
+        # "claude": (AnthropicAIModel, {}),
         "mistral": (MistralAIModel, {}),
+        "llama3.2": (OllamaAIModel, {"model": "llama3.2"}),
+        "llama3.2:1b": (OllamaAIModel, {"model": "llama3.2:1b"}),
+        "deepseek-r1": (OllamaAIModel, {"model": "deepseek-r1"}),
+        "deepseek-r1:1.5b": (OllamaAIModel, {"model": "deepseek-r1:1.5b"}),
+        "qwen2.5-coder": (OllamaAIModel, {"model": "qwen2.5-coder"}),
+        "qwen2.5-coder:1.5b": (OllamaAIModel, {"model": "qwen2.5-coder:1.5b"}),
     }
 
     def __init__(self):

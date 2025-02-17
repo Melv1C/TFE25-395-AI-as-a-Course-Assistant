@@ -11,7 +11,7 @@ class OpenAIModel(AbstractAIModel):
     API_KEY_ENV: str = "OPENAI_API_KEY"
 
     def __init__(self, model: str = "gpt-4o-mini"):
-        super().__init__()
+        super()._check_and_set_api_key()
         self.client = OpenAI(api_key=self.api_key)
         self.model = model
 

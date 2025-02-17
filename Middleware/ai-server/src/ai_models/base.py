@@ -6,12 +6,12 @@ class AbstractAIModel(ABC):
 
     API_KEY_ENV: str = ""  # To be set in subclasses
 
-    def __init__(self):
+    def _check_and_set_api_key(self):
         """Initialize the AI backend with the API key."""
         api_key = os.getenv(self.API_KEY_ENV)
         if not api_key:
             raise Exception(f"Missing API key for {self.__class__.__name__}")
-        self.api_key = api_key  # Store API key for requests
+        self.api_key = api_key
 
     @abstractmethod
     def get_response(self, prompt: str, system_prompt: str) -> str:

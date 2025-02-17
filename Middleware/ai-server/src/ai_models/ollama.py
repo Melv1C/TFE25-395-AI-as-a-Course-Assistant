@@ -1,23 +1,23 @@
+import os
 from dotenv import load_dotenv
 from .base import AbstractAIModel
-from openai import OpenAI
+from ollama import Client
 
 # Load environment variables
 load_dotenv()
 
-class DeepseekAIModel(AbstractAIModel):
-    """Deepseek AI model for generating text."""
+class OllamaAIModel(AbstractAIModel):
 
-    API_KEY_ENV: str = "DEEPSEEK_API_KEY"
-
-    def __init__(self, model: str = "deepseek-chat"):
-        super()._check_and_set_api_key()
-        self.client = OpenAI(api_key=self.api_key, base_url="https://api.deepseek.com")
+    def __init__(self, model: str = "llama3.2"):
+        self.client = Client(
+            host=os.getenv("OLLAMA_HOST"),
+        )
+        self.client.pull(model)
         self.model = model
 
     def get_response(self, prompt: str, system_prompt: str) -> str:
         """
-        Generate a response using the Deepseek AI model.
+        Generate a response using the Ollama AI model.
 
         Args:
             prompt (str): The user input prompt.
@@ -26,9 +26,7 @@ class DeepseekAIModel(AbstractAIModel):
         Returns:
             str: The AI-generated response
         """
-
-        # Generate a response from OpenAI
-        response = self.client.chat.completions.create(
+        response = self.client.chat(
             model=self.model,
             messages=[
                 {"role": "system", "content": system_prompt},
@@ -36,6 +34,6 @@ class DeepseekAIModel(AbstractAIModel):
             ],
         )
 
-        return response.choices[0].message.content
-
+        return response.message.content
+    
 

@@ -12,7 +12,7 @@ class GeminiAIModel(AbstractAIModel):
     API_KEY_ENV: str = "GEMINI_API_KEY"
 
     def __init__(self, model: str = "gemini-2.0-flash"):
-        super().__init__()
+        super()._check_and_set_api_key()
         self.client = genai.Client(api_key=self.api_key)
         self.model = model
 
