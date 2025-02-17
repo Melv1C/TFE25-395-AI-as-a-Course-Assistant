@@ -1,7 +1,7 @@
 services:
-  mongodb:
+  mongo:
     image: mongo:latest
-    container_name: mongodb
+    container_name: mongo
     restart: always
     ports:
       - "27017:27017"
@@ -11,13 +11,14 @@ services:
       - middleware
   mongo-express:
     image: mongo-express:latest
+    container_name: mongo-express
     restart: always
     ports:
       - "8443:8081"
     depends_on:
-      - mongodb
+      - mongo
     environment:
-      ME_CONFIG_MONGODB_SERVER: mongodb
+      ME_CONFIG_MONGODB_SERVER: mongo
       ME_CONFIG_MONGODB_PORT: 27017
       ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_EXPRESS_USERNAME}
       ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_EXPRESS_PASSWORD}
@@ -26,6 +27,7 @@ services:
 
   ollama:
     image: ollama/ollama:latest
+    container_name: ollama
     restart: always
     volumes:
       - ./ollama-volumes:/app/volumes
@@ -34,11 +36,12 @@ services:
 
   ai-server:
     build: ./ai-server
+    container_name: ai-server
     restart: always
     ports:
       - "5000:5000"
     depends_on:
-      - mongodb
+      - mongo
       - ollama
     environment:
       MONGO_URI: mongodb://mongodb:27017
