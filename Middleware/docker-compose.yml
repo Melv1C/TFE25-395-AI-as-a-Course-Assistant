@@ -24,7 +24,7 @@ services:
     image: ollama/ollama:latest
     restart: always
     volumes:
-      - ollama:/root/ollama
+      - ollama-volume:/root/.ollama
     networks:
       - middleware
 
