@@ -4,7 +4,7 @@ from ai_models.gemini import GeminiAIModel
 from ai_models.deepseek import DeepseekAIModel
 from ai_models.anthropic import AnthropicAIModel
 from ai_models.mistral import MistralAIModel
-from ai_models.ollama import OllamaAIModel
+from ai_models.ollama import OllamaAIModel, OllamaAIModelWithoutSystemPrompt
 
 from global_types import DataModel, Submission, Feedback
 from prompts import generate_prompt
@@ -15,17 +15,25 @@ class AIManager:
     """Manages available AI backends."""
 
     AI_CLASSES: dict[str, tuple[type[AbstractAIModel], dict]] = {
-        "gpt-4o-mini": (OpenAIModel, {}),
-        "gemini-2.0-flash": (GeminiAIModel, {}),
+        "gpt-4o-mini": (OpenAIModel, {"model": "gpt-4o-mini"}),
+        "gpt-3.5-turbo": (OpenAIModel, {"model": "gpt-3.5-turbo"}),
+        "gemini-2.0-flash": (GeminiAIModel, {"model": "gemini-2.0-flash"}),
+        "gemini-2.0-flash-lite": (GeminiAIModel, {"model": "gemini-2.0-flash-lite-preview-02-05"}),
+        "gemini-1.5-flash": (GeminiAIModel, {"model": "gemini-1.5-flash"}),
         # "deepseek": (DeepseekAIModel, {}),
         # "claude": (AnthropicAIModel, {}),
         "mistral-small-latest": (MistralAIModel, {}),
         "llama3.2": (OllamaAIModel, {"model": "llama3.2"}),
         "llama3.2:1b": (OllamaAIModel, {"model": "llama3.2:1b"}),
-        "llama3.2:1b": (OllamaAIModel, {"model": "llama3.2:1b"}),
         "local-mistral": (OllamaAIModel, {"model": "mistral"}),
-        "codellama": (OllamaAIModel, {"model": "codellama"}),
-        "deepseek-coder": (OllamaAIModel, {"model": "deepseek-coder"}),
+        "deepseek-r1": (OllamaAIModelWithoutSystemPrompt, {"model": "deepseek-r1"}), # Pas de system prompt
+        "codellama": (OllamaAIModelWithoutSystemPrompt, {"model": "codellama"}), # Pas de system prompt
+        "qwen2.5-coder": (OllamaAIModelWithoutSystemPrompt, {"model": "qwen2.5-coder"}), # Pas de system prompt
+        "qwen2.5-coder:1.5b": (OllamaAIModelWithoutSystemPrompt, {"model": "qwen2.5-coder:1.5b"}), # Pas de system prompt
+        "qwen2.5": (OllamaAIModel, {"model": "qwen2.5"}),
+        "qwen2.5-noSystemPrompt": (OllamaAIModelWithoutSystemPrompt, {"model": "qwen2.5"}), # Pas de system prompt
+        "phi3": (OllamaAIModel, {"model": "phi3"}),
+        "phi3-noSystemPrompt": (OllamaAIModelWithoutSystemPrompt, {"model": "phi3"}), # Pas de system prompt
     }
 
     def __init__(self):
