@@ -28,12 +28,12 @@ class AIManager:
         "local-mistral": (OllamaAIModel, {"model": "mistral"}),
         "deepseek-r1": (OllamaAIModelWithoutSystemPrompt, {"model": "deepseek-r1"}), # Pas de system prompt
         "codellama": (OllamaAIModelWithoutSystemPrompt, {"model": "codellama"}), # Pas de system prompt
-        "qwen2.5-coder": (OllamaAIModelWithoutSystemPrompt, {"model": "qwen2.5-coder"}), # Pas de system prompt
-        "qwen2.5-coder:1.5b": (OllamaAIModelWithoutSystemPrompt, {"model": "qwen2.5-coder:1.5b"}), # Pas de system prompt
-        "qwen2.5": (OllamaAIModel, {"model": "qwen2.5"}),
-        "qwen2.5-noSystemPrompt": (OllamaAIModelWithoutSystemPrompt, {"model": "qwen2.5"}), # Pas de system prompt
-        "phi3": (OllamaAIModel, {"model": "phi3"}),
-        "phi3-noSystemPrompt": (OllamaAIModelWithoutSystemPrompt, {"model": "phi3"}), # Pas de system prompt
+        # "qwen2.5-coder": (OllamaAIModelWithoutSystemPrompt, {"model": "qwen2.5-coder"}), # Pas de system prompt
+        # "qwen2.5-coder:1.5b": (OllamaAIModelWithoutSystemPrompt, {"model": "qwen2.5-coder:1.5b"}), # Pas de system prompt
+        # "qwen2.5": (OllamaAIModel, {"model": "qwen2.5"}),
+        # "qwen2.5-noSystemPrompt": (OllamaAIModelWithoutSystemPrompt, {"model": "qwen2.5"}), # Pas de system prompt
+        # "phi3": (OllamaAIModel, {"model": "phi3"}),
+        # "phi3-noSystemPrompt": (OllamaAIModelWithoutSystemPrompt, {"model": "phi3"}), # Pas de system prompt
     }
 
     def __init__(self):
