@@ -3,6 +3,8 @@ services:
     image: mongo:latest
     container_name: mongodb
     restart: always
+    ports:
+      - "27017:27017"
     volumes:
       - mongo_data:/data/db
     networks:
@@ -16,6 +18,7 @@ services:
       - mongodb
     environment:
       ME_CONFIG_MONGODB_SERVER: mongodb
+      ME_CONFIG_MONGODB_PORT: 27017
       ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_EXPRESS_USERNAME}
       ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_EXPRESS_PASSWORD}
     networks:
@@ -39,6 +42,7 @@ services:
       - ollama
     environment:
       MONGO_URI: mongodb://mongodb:27017
+      MONGO_COLLECTION: ${MONGO_COLLECTION}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       GEMINI_API_KEY: ${GEMINI_API_KEY}
       DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}
