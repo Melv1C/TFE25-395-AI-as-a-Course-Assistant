@@ -19,17 +19,17 @@ class AIManager:
         "gpt-3.5-turbo": (OpenAIModel, {"model": "gpt-3.5-turbo"}),
         "gemini-2.0-flash": (GeminiAIModel, {"model": "gemini-2.0-flash"}),
         "gemini-2.0-flash-lite": (GeminiAIModel, {"model": "gemini-2.0-flash-lite-preview-02-05"}),
-        "gemini-1.5-flash": (GeminiAIModel, {"model": "gemini-1.5-flash"}),
+        # "gemini-1.5-flash": (GeminiAIModel, {"model": "gemini-1.5-flash"}),
         # "deepseek": (DeepseekAIModel, {}),
         # "claude": (AnthropicAIModel, {}),
         "mistral-small-latest": (MistralAIModel, {}),
         "llama3.2": (OllamaAIModel, {"model": "llama3.2"}),
-        "llama3.2:1b": (OllamaAIModel, {"model": "llama3.2:1b"}),
+        # "llama3.2:1b": (OllamaAIModel, {"model": "llama3.2:1b"}),
         "local-mistral": (OllamaAIModel, {"model": "mistral"}),
-        "deepseek-r1": (OllamaAIModelWithoutSystemPrompt, {"model": "deepseek-r1"}), # Pas de system prompt
-        "codellama": (OllamaAIModelWithoutSystemPrompt, {"model": "codellama"}), # Pas de system prompt
+        # "deepseek-r1": (OllamaAIModelWithoutSystemPrompt, {"model": "deepseek-r1"}), # Pas de system prompt
+        # "codellama": (OllamaAIModelWithoutSystemPrompt, {"model": "codellama"}), # Pas de system prompt
         # "qwen2.5-coder": (OllamaAIModelWithoutSystemPrompt, {"model": "qwen2.5-coder"}), # Pas de system prompt
-        # "qwen2.5-coder:1.5b": (OllamaAIModelWithoutSystemPrompt, {"model": "qwen2.5-coder:1.5b"}), # Pas de system prompt
+        "qwen2.5-coder:1.5b": (OllamaAIModelWithoutSystemPrompt, {"model": "qwen2.5-coder:1.5b"}), # Pas de system prompt
         # "qwen2.5": (OllamaAIModel, {"model": "qwen2.5"}),
         # "qwen2.5-noSystemPrompt": (OllamaAIModelWithoutSystemPrompt, {"model": "qwen2.5"}), # Pas de system prompt
         # "phi3": (OllamaAIModel, {"model": "phi3"}),
