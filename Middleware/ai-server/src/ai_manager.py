@@ -15,11 +15,14 @@ class AIManager:
     """Manages available AI backends."""
 
     AI_CLASSES: dict[str, tuple[type[AbstractAIModel], dict]] = {
+        "o3-mini": (OpenAIModel, {"model": "o3-mini"}),
+        "o1-mini": (OpenAIModel, {"model": "o1-mini"}),
+        "gpt-4o": (OpenAIModel, {"model": "gpt-4o"}),
         "gpt-4o-mini": (OpenAIModel, {"model": "gpt-4o-mini"}),
-        "gpt-3.5-turbo": (OpenAIModel, {"model": "gpt-3.5-turbo"}),
+        # "gpt-3.5-turbo": (OpenAIModel, {"model": "gpt-3.5-turbo"}),
         "gemini-2.0-flash": (GeminiAIModel, {"model": "gemini-2.0-flash"}),
         "gemini-2.0-flash-lite": (GeminiAIModel, {"model": "gemini-2.0-flash-lite-preview-02-05"}),
-        "gemini-1.5-flash": (GeminiAIModel, {"model": "gemini-1.5-flash"}),
+        # "gemini-1.5-flash": (GeminiAIModel, {"model": "gemini-1.5-flash"}),
         # "deepseek": (DeepseekAIModel, {}),
         # "claude": (AnthropicAIModel, {}),
         "mistral-small-latest": (MistralAIModel, {}),
@@ -28,7 +31,6 @@ class AIManager:
         "phi3": (OllamaAIModel, {"model": "phi3"}),
         #"deepseek-r1:1.5b": (OllamaAIModelWithoutSystemPrompt, {"model": "deepseek-r1:1.5b"}), # Pas de system prompt
         #"qwen2.5:3b": (OllamaAIModelWithoutSystemPrompt, {"model": "qwen2.5:3b"}), # Pas de system prompt
-
     }
 
     def __init__(self):
