@@ -15,8 +15,7 @@ class AIManager:
     """Manages available AI backends."""
 
     AI_CLASSES: dict[str, tuple[type[AbstractAIModel], dict]] = {
-        "o3-mini": (OpenAIModel, {"model": "o3-mini"}),
-        "o1-mini": (OpenAIModel, {"model": "o1-mini"}),
+        "o1": (OpenAIModel, {"model": "o1"}),
         "gpt-4o": (OpenAIModel, {"model": "gpt-4o"}),
         "gpt-4o-mini": (OpenAIModel, {"model": "gpt-4o-mini"}),
         # "gpt-3.5-turbo": (OpenAIModel, {"model": "gpt-3.5-turbo"}),
