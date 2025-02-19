@@ -1,30 +1,37 @@
-import yaml
-from ai_course_assistant import AICourseAssistant, AIFeedbackBlock, AsyncFeedbackBlock
-
 from inginious_container_api import feedback, input
+from ai_course_assistant import AIIngiAssistant, BaseDataModel, BaseSubmission
+import subprocess
 
-URL = "https://example.com"
+AIIngiAssistant.server("https://tfe-claes.info.ucl.ac.be")
+assistant = AIIngiAssistant.get_instance(
+    input, 
+    feedback, 
+    BaseDataModel(
+        ai_model="gemini", 
+        question=AIIngiAssistant.get_context(),
+        max_nb_of_feedbacks=3
+    )
+)
 
-with open("task.yaml", "r") as f:
-    task = yaml.safe_load(f)
-    print(task)
+# Read the student's code from the input
+student_code = input.get_input("code")
 
+# Write the student's code to a file
+with open("student/student_code.py", "w") as code_file:
+    code_file.write(student_code)
 
-if __name__ == "__main__":
-    question = task["problems"]["code"]["header"]
-    input_student = input.get_input("code")
+# Execute the student's code
+result = subprocess.run(["python3", "student/student_code.py"], capture_output=True, text=True)
 
+# Check the output and provide feedback
+if result.stdout.strip() == "Hello World!":
+    feedback.set_global_result("success")
+else:
     feedback.set_global_result("failed")
-    feedback.set_grade(0)
-    feedback.set_global_feedback("Some basic feedback")
+    feedback.set_global_feedback(f"Ton code affiche: {result.stdout.strip()}")
 
-    AICourseAssistant.init(URL)
-    assistant = AICourseAssistant(question, input_student)
-    res = assistant.getFeedbackAsync()
-    if res.success:
-        feedback.set_global_feedback(AsyncFeedbackBlock(URL, res.id))
-    else:
-        print("Error:", res.message)
-        feedback.set_global_feedback("An error occurred while asking for an AI feedback.", True)
-
-        
+    # Provide AI feedback
+    assistant.set_submission(BaseSubmission(
+        student_input=student_code
+    ))
+    assistant.add_ai_feedback(feedback)
