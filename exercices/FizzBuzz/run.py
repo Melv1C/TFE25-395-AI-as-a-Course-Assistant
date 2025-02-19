@@ -3,23 +3,19 @@ from inginious_container_api import feedback, input, run_student, rst
 
 AIIngiAssistant.server("https://tfe-claes.info.ucl.ac.be/")
 
-PROMPT = "Bonjour, j'ai un problème avec mon code. Voici ce que j'ai fait : \n\n{student_input}\n\nMais j'ai eu cette erreur lors de l'exécution du programme avec n = {test_case} : \n\n{error}\n\n"
+PROMPT = "J'ai un problème avec mon code. Voici ce que j'ai fait : \n\n{student_input}\n\nMais j'ai eu cette erreur lors de l'exécution du programme avec n = {test_case} : \n\n{error}\n\n"
 
 # Création de l’assistant IA pour un étudiant
-assistant = AIIngiAssistant.get_instance(
+assistant = AIIngiAssistant.get_instance_and_handle_state(
     input, 
     feedback, 
     BaseDataModel(
         ai_model="gpt-4o", 
         question=AIIngiAssistant.get_context(),
-        max_nb_of_feedbacks=5,
-        prompt=PROMPT,
-        metadata={
-            "username": input.get_username(),
-            "exercise": "FizzBuzz"
-        }
+        max_nb_of_feedbacks=5
     )
 )
+assistant.set_default_metadata(input)
 
 def compute_code():
     """
@@ -67,28 +63,31 @@ def run_unit_tests():
             feedback.set_global_result("failed")
             feedback.set_global_feedback(rst.get_codeblock('bash',str(e)))
             feedback.set_grade(0)
-            assistant.set_submission(BaseSubmission(
+            assistant.set_submission_data(BaseSubmission(
                 student_input=input.get_input("code"), 
+                prompt=PROMPT,
                 metadata={
                     "error": str(e),
                     "test_case": n,
                     "success": False
                 }
             ))
-            assistant.add_ai_feedback(feedback)
+            assistant.set_default_submission_metadata(input)
+            assistant.add_ai_feedback_and_set_state(feedback)
             return
 
     feedback.set_global_result("success")
     feedback.set_global_feedback("Tous les tests unitaires ont réussi.")
     feedback.set_grade(100)
-    assistant.set_submission(BaseSubmission(
-        student_input=input.get_input("code"), 
+    assistant.set_submission_data(BaseSubmission(
+        student_input=input.get_input("code"),
         metadata={
             "error": "",
             "test_case": 0,
             "success": True
         }
     ))
+    assistant.set_default_submission_metadata(input)
     assistant.send()
 
 if __name__ == "__main__":

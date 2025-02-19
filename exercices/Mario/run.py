@@ -32,21 +32,17 @@ Mamma mia, allons-y ! 🚀"""
 PROMPT = "Bonjour Mario, j'ai un problème avec mon code. Voici ce que j'ai fait : \n\n{student_input}\n\nMais j'ai eu cette erreur : \n\n{error}\n\nPeux-tu m'aider ?"
 
 # Création de l’assistant IA pour un étudiant
-assistant = AIIngiAssistant.get_instance(
+assistant = AIIngiAssistant.get_instance_and_handle_state(
     input, 
     feedback, 
     BaseDataModel(
         ai_model="gpt-4o", 
         question=AIIngiAssistant.get_context(),
         max_nb_of_feedbacks=5,
-        system_prompt=SYSTEM_PROMPT,
-        prompt=PROMPT,
-        metadata={
-            "username": input.get_username(),
-            "exercise": "Mario"
-        }
+        system_prompt=SYSTEM_PROMPT
     )
 )
+assistant.set_default_metadata(input)
 
 
 def run_tests():
@@ -75,13 +71,23 @@ def run_tests():
             feedback.set_global_feedback("\nVoici l'erreur:\n\n", True)
             feedback.set_global_feedback(rst.get_codeblock("bash", result.stderr), True)
 
-            assistant.set_submission(BaseSubmission(student_input=student_code, metadata={"error": result.stderr}))
-            assistant.add_ai_feedback(feedback)
+            assistant.set_submission_data(BaseSubmission(
+                student_input=student_code, 
+                prompt=PROMPT,
+                metadata={"error": result.stderr, "success": False}
+            ))
+            assistant.set_default_submission_metadata(input)
+            assistant.add_ai_feedback_and_set_state(feedback)
             return
         
     feedback.set_global_result("success")
     feedback.set_global_feedback("Bravo, tous les tests ont passé avec succès!")
-        
+    assistant.set_submission_data(BaseSubmission(
+        student_input=student_code,
+        metadata={"success": True, "error": ""},
+    ))
+    assistant.set_default_submission_metadata(input)
+    assistant.send()
 
 student_code = input.get_input("code")
 input.parse_template("template.py")

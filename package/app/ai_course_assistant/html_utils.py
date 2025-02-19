@@ -22,17 +22,28 @@ def feedback_block(id: str, url: str) -> str:
     </div>
 
     <script>
+        function loadShowdown(callback) {{
+            if (window.showdown) {{
+                // Showdown is already loaded, execute the callback immediately
+                callback();
+            }} else {{
+                // Dynamically load Showdown
+                var script = document.createElement('script');
+                script.src = "https://cdn.jsdelivr.net/npm/showdown@2.1.0/dist/showdown.min.js";
+                script.onload = callback; // Run callback once the script is loaded
+                document.body.appendChild(script);
+            }}
+        }}
+
+        // Function to convert Markdown to HTML using Showdown
         function markdownToHTML(markdown) {{
-            return markdown
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-                .replace(/\*(.*?)\*/g, "<em>$1</em>")
-                .replace(/```([\s\S]*?)```/g, "<pre><code>$1</code></pre>")
-                .replace(/`(.*?)`/g, "<code>$1</code>")
-                .replace(/^- (.*)$/gm, "<li>$1</li>")
-                .replace(/(<li>.*<\/li>(?:\\n<li>.*<\/li>)*)/g, "<ul>$1</ul>")
-                .replace(/\\n(?!<\/?(ul|ol|li)>)/g, "<br>");
+            var converter = new showdown.Converter({{
+                tables: true, 
+                simplifiedAutoLink: true, 
+                strikethrough: true, 
+                tasklists: true 
+            }});
+            return converter.makeHtml(markdown);
         }}
 
         function getData(submissionId) {{
@@ -46,9 +57,11 @@ def feedback_block(id: str, url: str) -> str:
                     const progressBar = document.getElementById(`progressBar_${{submissionId}}`);
 
                     if (data.data.submission.feedback) {{
-                        feedbackContent.innerHTML = markdownToHTML(data.data.submission.feedback.feedback);
-                        feedbackContent.style.display = 'block';
-                        feedbackButton.style.display = 'none';
+                        loadShowdown(() => {{
+                            feedbackContent.innerHTML = markdownToHTML(data.data.submission.feedback.feedback);
+                            feedbackContent.style.display = 'block';
+                            feedbackButton.style.display = 'none';
+                        }});
                     }} else {{
                         feedbackButton.style.display = 'block';
                         feedbackContent.style.display = 'none';

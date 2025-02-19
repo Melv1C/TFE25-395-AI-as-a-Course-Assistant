@@ -20,13 +20,13 @@ assistant = AIIngiAssistant(BaseDataModel(
     question=question,
     max_nb_of_feedbacks=1,
     system_prompt=system_prompt,
-    prompt=prompt,
     metadata=system_prompt_metadata
 ))
 
 # Set the student's submission
-assistant.set_submission(BaseSubmission(
+assistant.set_submission_data(BaseSubmission(
     student_input=student_input,
+    prompt=prompt,
     metadata=prompt_metadata
 ))
 
