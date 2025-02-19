@@ -7,7 +7,7 @@ from .html_utils import feedback_block
 class AIIngiAssistant(AICourseAssistant):
 
     @classmethod
-    def get_instance(cls, input, feedback, data: BaseDataModel):
+    def get_instance_and_handle_state(cls, input, feedback, data: BaseDataModel) -> 'AIIngiAssistant':
         """Initializes the AI assistant."""
         cls._check_server()
         state = input.get_input("@state")
@@ -31,7 +31,24 @@ class AIIngiAssistant(AICourseAssistant):
             task = yaml.safe_load(f)
         return task["problems"][problem_id]["header"]
     
-    def add_ai_feedback(self, feedback, timeout: int = 5):
+    def set_default_metadata(self, input):
+        with open("task.yaml", "r") as f:
+            task = yaml.safe_load(f)
+        self.data.metadata = {
+            "username": input.get_username(),
+            "exercise": task["name"],
+            **self.data.metadata,
+        }
+
+    def set_default_submission_metadata(self, input):
+        if not hasattr(self, 'submission'):
+            raise Exception("The submission has not been set.")
+        self.submission.metadata = {
+            "attempts": input.get_input("@attempts"),
+            **self.submission.metadata,
+        }
+    
+    def add_ai_feedback_and_set_state(self, feedback, timeout: int = 5):
         try:
             self.send(timeout)
             if not hasattr(self, 'res'):

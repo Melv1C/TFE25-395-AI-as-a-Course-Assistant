@@ -14,13 +14,13 @@ class ResponseModel(BaseModel):
 class BaseSubmission(BaseModel):
     """Represents the base submission in the database."""
     student_input: str
+    prompt: Optional[str] = None
     metadata: Dict[str, Any] = {}
 
 class BaseDataModel(BaseModel):
     """Represents the base data model for the API."""
     ai_model: str
     question: str
-    system_prompt: Optional[str] = None
-    prompt: Optional[str] = None
     max_nb_of_feedbacks: Optional[int] = None
+    system_prompt: Optional[str] = None
     metadata: Dict[str, Any] = {}
