@@ -1,38 +1,25 @@
 from ai_course_assistant import AIIngiAssistant, BaseDataModel, BaseSubmission
 from inginious_container_api import feedback, input, run_student, rst
 
-# URL of the AI assistant service
-URL = "https://tfe-claes.info.ucl.ac.be"
+AIIngiAssistant.server("https://tfe-claes.info.ucl.ac.be/")
 
-def request_ai_feedback():
-    """
-    Request AI feedback if unit tests fail.
-    """
-    question = AIIngiAssistant.get_context()
-    student_input = input.get_input("code")
+PROMPT = "Bonjour, j'ai un problème avec mon code. Voici ce que j'ai fait : \n\n{student_input}\n\nMais j'ai eu cette erreur lors de l'exécution du programme avec n = {test_case} : \n\n{error}\n\n"
 
-    # Initialize the AI assistant with the task context and student input
-    AIIngiAssistant.server(URL)
-    assistant = AIIngiAssistant(BaseDataModel(
-        ai_model="openai",
-        question=question,
-    ))
-
-    assistant.set_submission(BaseSubmission(
-        student_input=student_input
-    ))
-    
-    # Get AI feedback asynchronously
-    try:
-        res = assistant.send()
-        print(res)
-        assistant._set_data_id(res.data_id)
-        feedback.set_global_feedback("\n\n", True)
-        feedback.set_global_feedback(assistant.rst_feedback(res), True)
-    except Exception as e:
-        feedback.set_global_feedback("Une erreur s'est produite lors de la demande de feedback à l'assistant AI.", True)
-        feedback.set_global_feedback(rst.get_codeblock('bash',str(e)), True)
-
+# Création de l’assistant IA pour un étudiant
+assistant = AIIngiAssistant.get_instance(
+    input, 
+    feedback, 
+    BaseDataModel(
+        ai_model="gpt-4o", 
+        question=AIIngiAssistant.get_context(),
+        max_nb_of_feedbacks=5,
+        prompt=PROMPT,
+        metadata={
+            "username": input.get_username(),
+            "exercise": "FizzBuzz"
+        }
+    )
+)
 
 def compute_code():
     """
@@ -80,12 +67,29 @@ def run_unit_tests():
             feedback.set_global_result("failed")
             feedback.set_global_feedback(rst.get_codeblock('bash',str(e)))
             feedback.set_grade(0)
-            request_ai_feedback()
+            assistant.set_submission(BaseSubmission(
+                student_input=input.get_input("code"), 
+                metadata={
+                    "error": str(e),
+                    "test_case": n,
+                    "success": False
+                }
+            ))
+            assistant.add_ai_feedback(feedback)
             return
 
     feedback.set_global_result("success")
     feedback.set_global_feedback("Tous les tests unitaires ont réussi.")
     feedback.set_grade(100)
+    assistant.set_submission(BaseSubmission(
+        student_input=input.get_input("code"), 
+        metadata={
+            "error": "",
+            "test_case": 0,
+            "success": True
+        }
+    ))
+    assistant.send()
 
 if __name__ == "__main__":
     compute_code()
