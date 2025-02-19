@@ -6,7 +6,7 @@ from pydantic import ValidationError
 
 from global_types import ResponseModel, BaseDataModel, BaseSubmission
 from database import (
-    save_data, get_data_by_id, add_submission
+    save_data, get_data_by_id, add_submission, get_all_data
 )
 from ai_manager import AIManager
 
@@ -38,6 +38,15 @@ def home():
 def ais():
     """Returns a list of available AI models."""
     return jsonify(ResponseModel(message="Success", data=ai_manager.get_available_ais()).model_dump())
+
+@app.route('/data', methods=['GET'])
+def get_all_data_route():
+    """Returns all data from the database."""
+    try:
+        data = get_all_data()
+        return jsonify(ResponseModel(message="Success", data=[d.model_dump() for d in data]).model_dump())
+    except Exception as e:
+        return jsonify(ResponseModel(message=f"Internal server error: {e}").model_dump()), 500
 
 @app.route('/', methods=['POST'])
 def save_data_route():

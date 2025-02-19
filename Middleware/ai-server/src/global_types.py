@@ -21,6 +21,7 @@ class Feedback(BaseModel):
 class BaseSubmission(BaseModel):
     """Represents the base submission in the database."""
     student_input: str
+    prompt: str = DEFAULT_PROMPT
     metadata: Dict[str, Any] = {}
 
 class Submission(BaseSubmission):
@@ -34,7 +35,6 @@ class BaseDataModel(BaseModel):
     ai_model: str
     question: str
     system_prompt: str = DEFAULT_SYSTEM_PROMPT
-    prompt: str = DEFAULT_PROMPT
     max_nb_of_feedbacks: int = DEFAULT_MAX_NB_OF_FEEDBACKS
     metadata: Dict[str, Any] = {}
 

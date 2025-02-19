@@ -69,7 +69,7 @@ class AIManager:
             "question": data.question,
             **data.metadata,
         })
-        prompt = generate_prompt(data.prompt, {
+        prompt = generate_prompt(submission.prompt, {
             "student_input": submission.student_input,
             **submission.metadata,
         })

@@ -56,3 +56,7 @@ def add_feedback(data_id: str, submission_id: str, feedback: Feedback):
         {"$set": {"submissions.$.feedback": feedback.model_dump()}}
     )
 
+def get_all_data() -> list[DataModel]:
+    """Retrieves all data from the database."""
+    return [DataModel(**data) for data in collection.find()]
+

@@ -25,7 +25,7 @@ DEFAULT_SYSTEM_PROMPT = """Tu es un assistant en programmation qui aide les étu
 - **Utilise le Markdown pour structurer ta réponse**.  
 """
 
-DEFAULT_PROMPT = "Bonjour, j'ai un problème avec mon code. Voici ce que j'ai fait : \n\n{student_input}"
+DEFAULT_PROMPT = "J'ai un problème avec mon code. Voici ce que j'ai fait : \n\n{student_input}"
 
 def generate_prompt(prompt_template: str, metadata: Dict[str, Any]) -> str:
     """Generate the prompt for the AI model."""
